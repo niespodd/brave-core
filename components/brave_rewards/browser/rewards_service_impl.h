@@ -317,6 +317,8 @@ class RewardsServiceImpl : public RewardsService,
 
   void EnableRewards() override;
 
+  void OnRewardsPanelClosed(Browser* browser) override;
+
   void GetMonthlyReport(
       const uint32_t month,
       const uint32_t year,

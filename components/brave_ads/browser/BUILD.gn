@@ -36,6 +36,7 @@ static_library("browser") {
     "//brave/browser/notifications",
     "//brave/common",
     "//brave/components/brave_ads/common",
+    "//brave/components/brave_ads/common:mojom",
     "//brave/components/brave_ads/resources",
     "//brave/components/brave_component_updater/browser",
     "//brave/components/brave_rewards/common",

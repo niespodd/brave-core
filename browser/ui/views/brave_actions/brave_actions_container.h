@@ -12,6 +12,7 @@
 
 #include "base/scoped_observation.h"
 #include "brave/browser/extensions/api/brave_action_api.h"
+#include "brave/browser/ui/views/brave_actions/brave_actions_container_delegate.h"
 #include "brave/browser/ui/views/brave_actions/brave_rewards_action_stub_view.h"
 #include "brave/components/brave_rewards/browser/rewards_service.h"
 #include "chrome/browser/extensions/api/extension_action/extension_action_api.h"
@@ -45,6 +46,7 @@ class BraveActionsContainer : public views::View,
                               public extensions::ExtensionActionAPI::Observer,
                               public extensions::ExtensionRegistryObserver,
                               public ToolbarActionView::Delegate,
+                              public BraveActionsContainerDelegate,
                               public BraveRewardsActionStubView::Delegate {
  public:
   BraveActionsContainer(Browser* browser, Profile* profile);
@@ -68,6 +70,9 @@ class BraveActionsContainer : public views::View,
   bool CanStartDragForView(View* sender,
                            const gfx::Point& press_pt,
                            const gfx::Point& p) override;
+
+  // BraveActionsContainerDelegate
+  void OnPopupClosed(const extensions::ExtensionId& extension_id) override;
 
   // BraveRewardsActionStubView::Delegate
   void OnRewardsStubButtonClicked() override;

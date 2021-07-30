@@ -17,6 +17,8 @@ namespace features {
 
 extern const base::Feature kAdNotifications;
 
+extern const base::Feature kRequestAdsEnabledApi;
+
 bool IsAdNotificationsEnabled();
 int AdNotificationTimeout();
 
@@ -31,6 +33,9 @@ double AdNotificationNormalizedDisplayCoordinateX();
 int AdNotificationInsetX();
 double AdNotificationNormalizedDisplayCoordinateY();
 int AdNotificationInsetY();
+
+bool IsRequestAdsEnabledApiEnabled();
+
 #endif  // !defined(OS_ANDROID)
 
 }  // namespace features

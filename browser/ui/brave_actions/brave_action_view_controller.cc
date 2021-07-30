@@ -12,6 +12,7 @@
 #include "base/memory/ptr_util.h"
 #include "brave/browser/profiles/profile_util.h"
 #include "brave/browser/ui/brave_actions/brave_action_icon_with_badge_image_source.h"
+#include "brave/browser/ui/views/brave_actions/brave_actions_container_delegate.h"
 #include "chrome/browser/extensions/extension_view_host.h"
 #include "chrome/browser/extensions/extension_view_host_factory.h"
 #include "chrome/browser/profiles/profile.h"
@@ -40,7 +41,8 @@
 std::unique_ptr<BraveActionViewController> BraveActionViewController::Create(
     const extensions::ExtensionId& extension_id,
     Browser* browser,
-    ExtensionsContainer* extensions_container) {
+    ExtensionsContainer* extensions_container,
+    BraveActionsContainerDelegate* actions_container_delegate) {
   DCHECK(browser);
 
   auto* registry = extensions::ExtensionRegistry::Get(browser->profile());
@@ -55,7 +57,7 @@ std::unique_ptr<BraveActionViewController> BraveActionViewController::Create(
   // WrapUnique() because the constructor is private.
   return base::WrapUnique(new BraveActionViewController(
       std::move(extension), browser, extension_action, registry,
-      extensions_container));
+      extensions_container, actions_container_delegate));
 }
 
 BraveActionViewController::BraveActionViewController(
@@ -63,12 +65,16 @@ BraveActionViewController::BraveActionViewController(
     Browser* browser,
     extensions::ExtensionAction* extension_action,
     extensions::ExtensionRegistry* extension_registry,
-    ExtensionsContainer* extensions_container)
+    ExtensionsContainer* extensions_container,
+    BraveActionsContainerDelegate* actions_container_delegate)
     : ExtensionActionViewController(std::move(extension),
                                     browser,
                                     extension_action,
                                     extension_registry,
-                                    extensions_container) {}
+                                    extensions_container),
+      actions_container_delegate_(actions_container_delegate) {
+  DCHECK(actions_container_delegate_);
+}
 
 bool BraveActionViewController::IsEnabled(
     content::WebContents* web_contents) const {
@@ -122,6 +128,7 @@ void BraveActionViewController::OnPopupClosed() {
   popup_host_observation_.Reset();
   popup_host_ = nullptr;
   view_delegate_->OnPopupClosed();
+  actions_container_delegate_->OnPopupClosed(extension()->id());
 }
 
 gfx::Image BraveActionViewController::GetIcon(

@@ -209,7 +209,7 @@ void BraveActionsContainer::AddAction(const extensions::Extension* extension) {
     // If we do require notifications when popups are open or closed,
     // then we should inherit and pass |this| through.
     actions_[id].view_controller_ = BraveActionViewController::Create(
-        extension->id(), browser_, empty_extensions_container_.get());
+        extension->id(), browser_, empty_extensions_container_.get(), this);
     // The button view
     actions_[id].view_ = std::make_unique<BraveActionView>(
         actions_[id].view_controller_.get(), this);
@@ -352,6 +352,15 @@ bool BraveActionsContainer::CanStartDragForView(View* sender,
   return false;
 }
 // end ToolbarActionView::Delegate members
+
+// BraveActionsContainerDelegate members
+void BraveActionsContainer::OnPopupClosed(
+    const extensions::ExtensionId& extension_id) {
+  if (extension_id == brave_rewards_extension_id && rewards_service_) {
+    rewards_service_->OnRewardsPanelClosed(browser_);
+  }
+}
+// end BraveActionsContainerDelegate members
 
 // BraveRewardsActionStubView::Delegate members
 void BraveActionsContainer::OnRewardsStubButtonClicked() {

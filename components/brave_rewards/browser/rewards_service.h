@@ -21,6 +21,7 @@
 #include "components/sessions/core/session_id.h"
 #include "url/gurl.h"
 
+class Browser;
 class PrefRegistrySimple;
 class Profile;
 
@@ -201,6 +202,8 @@ class RewardsService : public KeyedService {
   // time will turn on both Ads and auto-contribute. Subsequent calls will only
   // turn on Ads.
   virtual void EnableRewards() = 0;
+
+  virtual void OnRewardsPanelClosed(Browser* browser) = 0;
 
   virtual void GetBalanceReport(
       const uint32_t month,

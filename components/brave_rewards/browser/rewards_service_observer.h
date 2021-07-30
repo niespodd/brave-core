@@ -13,6 +13,8 @@
 #include "base/observer_list_types.h"
 #include "bat/ledger/mojom_structs.h"
 
+class Browser;
+
 namespace brave_rewards {
 
 class RewardsService;
@@ -50,6 +52,10 @@ class RewardsServiceObserver : public base::CheckedObserver {
       const double amount,
       const ledger::type::RewardsType type,
       const ledger::type::ContributionProcessor processor) {}
+
+  virtual void OnProcessForEnableRewardsStarted() {}
+
+  virtual void OnRewardsPanelClosed(Browser* browser) {}
 
   virtual void OnAdsEnabled(
       brave_rewards::RewardsService* rewards_service,

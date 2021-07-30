@@ -9,6 +9,10 @@ source_set("brave_ads") {
     "ads_service_factory.h",
     "ads_tab_helper.cc",
     "ads_tab_helper.h",
+    "brave_ads_driver.cc",
+    "brave_ads_driver.h",
+    "brave_ads_driver_private.cc",
+    "brave_ads_driver_private.h",
   ]
 
   deps = [

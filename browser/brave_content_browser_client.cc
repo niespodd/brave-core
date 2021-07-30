@@ -139,6 +139,12 @@ using extensions::ChromeContentBrowserClientExtensionsPart;
 #include "brave/browser/ftx/ftx_protocol_handler.h"
 #endif
 
+#if BUILDFLAG(BRAVE_ADS_ENABLED)
+#include "brave/browser/brave_ads/brave_ads_driver.h"
+#include "brave/browser/brave_ads/brave_ads_driver_private.h"
+#include "brave/components/brave_ads/common/features.h"
+#endif
+
 #if BUILDFLAG(BRAVE_WALLET_ENABLED)
 #include "brave/browser/brave_wallet/brave_wallet_context_utils.h"
 #include "brave/browser/brave_wallet/rpc_controller_factory.h"
@@ -198,6 +204,27 @@ void BindCosmeticFiltersResources(
           settings_map, g_brave_browser_process->ad_block_service()),
       std::move(receiver));
 }
+
+#if BUILDFLAG(BRAVE_ADS_ENABLED)
+void BindBraveAdsDriver(
+    content::RenderFrameHost* const frame_host,
+    mojo::PendingReceiver<brave_ads::mojom::BraveAdsDriver> receiver) {
+  auto* context = frame_host->GetBrowserContext();
+  auto* profile = Profile::FromBrowserContext(context);
+  content::WebContents* web_contents =
+      content::WebContents::FromRenderFrameHost(frame_host);
+  if (brave::IsRegularProfile(profile)) {
+    mojo::MakeSelfOwnedReceiver(
+        std::make_unique<brave_ads::BraveAdsDriver>(profile, web_contents),
+        std::move(receiver));
+  } else {
+    // Dummy API which always returns false for private contexts.
+    mojo::MakeSelfOwnedReceiver(
+        std::make_unique<brave_ads::BraveAdsDriverPrivate>(),
+        std::move(receiver));
+  }
+}
+#endif  // BUILDFLAG(BRAVE_ADS_ENABLED)
 
 #if BUILDFLAG(BRAVE_WALLET_ENABLED)
 void MaybeBindBraveWalletProvider(
@@ -335,6 +362,12 @@ void BraveContentBrowserClient::RegisterBrowserInterfaceBindersForFrame(
     map->Add<brave_search::mojom::BraveSearchDefault>(
         base::BindRepeating(&BindBraveSearchDefaultHost));
   }
+
+#if BUILDFLAG(BRAVE_ADS_ENABLED)
+  map->Add<brave_ads::mojom::BraveAdsDriver>(
+      base::BindRepeating(&BindBraveAdsDriver));
+#endif  // BUILDFLAG(BRAVE_ADS_ENABLED)
+
 #if BUILDFLAG(BRAVE_WALLET_ENABLED)
   if (brave_wallet::IsNativeWalletEnabled()) {
     map->Add<brave_wallet::mojom::BraveWalletProvider>(

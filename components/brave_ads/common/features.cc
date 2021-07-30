@@ -16,6 +16,9 @@ const base::Feature kAdNotifications{"AdNotifications",
 const base::Feature kCustomAdNotifications{"CustomAdNotifications",
                                            base::FEATURE_DISABLED_BY_DEFAULT};
 
+const base::Feature kRequestAdsEnabledApi{"RequestAdsEnabledApi",
+                                          base::FEATURE_DISABLED_BY_DEFAULT};
+
 namespace {
 
 // Ad notification timeout in seconds. Set to 0 to never time out
@@ -148,6 +151,10 @@ int AdNotificationInsetY() {
   return GetFieldTrialParamByFeatureAsInt(
       kCustomAdNotifications, kFieldTrialParameterAdNotificationInsetY,
       kDefaultAdNotificationInsetY);
+}
+
+bool IsRequestAdsEnabledApiEnabled() {
+  return base::FeatureList::IsEnabled(kRequestAdsEnabledApi);
 }
 
 #endif  // !defined(OS_ANDROID)
