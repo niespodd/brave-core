@@ -11,6 +11,7 @@
 #include "base/compiler_specific.h"
 #include "base/logging.h"
 #include "base/strings/sys_string_conversions.h"
+#include "brave/components/brave_wallet/browser/wallet_data_files_installer.h"
 #include "brave/ios/app/brave_main_delegate.h"
 #include "brave/ios/browser/api/bookmarks/brave_bookmarks_api+private.h"
 #include "brave/ios/browser/api/brave_wallet/brave_wallet.mojom.objc+private.h"
@@ -91,6 +92,8 @@ static BraveCoreLogHandler _Nullable _logHandler = nil;
 
     ios::GetChromeBrowserProvider().Initialize();
 
+    [self registerComponentsForUpdate];
+    
     ios::ChromeBrowserStateManager* browserStateManager =
         GetApplicationContext()->GetChromeBrowserStateManager();
     ChromeBrowserState* chromeBrowserState =
@@ -118,6 +121,14 @@ static BraveCoreLogHandler _Nullable _logHandler = nil;
 
 - (void)scheduleLowPriorityStartupTasks {
   [StartupTasks scheduleDeferredBrowserStateInitialization:_mainBrowserState];
+}
+
+- (void)registerComponentsForUpdate {
+  component_updater::ComponentUpdateService* cus =
+      GetApplicationContext()->GetComponentUpdateService();
+  DCHECK(cus);
+
+  brave_wallet::RegisterWalletDataFilesComponent(cus);
 }
 
 - (void)dealloc {
