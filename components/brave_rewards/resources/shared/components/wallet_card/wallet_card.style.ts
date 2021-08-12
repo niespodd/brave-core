@@ -6,7 +6,7 @@ import styled from 'styled-components'
 
 export const root = styled.div`
   background: linear-gradient(125.83deg, #392DD1 0%, #A91B78 99.09%);
-  border-radius: 16px;
+  border-radius: 14px;
   font-family: var(--brave-font-heading);
   color: var(--brave-palette-white);
 `

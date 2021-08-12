@@ -76,7 +76,8 @@ function createHost (): Host {
     externalWallet: {
       provider: 'uphold',
       username: 'brave123',
-      status: 'verified'
+      status: 'verified',
+      links: {}
     },
     summaryData: {
       grantClaims: 10,

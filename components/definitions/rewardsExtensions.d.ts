@@ -108,6 +108,7 @@ declare namespace RewardsExtension {
     result: number
     promotionId: string
     captchaImage: string
+    captchaId: string
     hint: string
   }
 
@@ -144,7 +145,7 @@ declare namespace RewardsExtension {
   }
 
   interface RecurringTips {
-    recurringTips: Record<string, number>[]
+    recurringTips: ({ publisherKey: string, amount: number })[]
   }
 
   interface PublisherBanner {

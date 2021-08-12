@@ -16,6 +16,11 @@ export interface ExternalWallet {
   provider: ExternalWalletProvider
   status: ExternalWalletStatus
   username: string
+  links: {
+    account?: string
+    addFunds?: string
+    completeVerification?: string
+  }
 }
 
 // Returns the external wallet provider name for the specified provider.

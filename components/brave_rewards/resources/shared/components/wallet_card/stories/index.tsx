@@ -47,7 +47,8 @@ export function Wallet () {
   const externalWallet: ExternalWallet = {
     provider: 'uphold',
     status: 'verified',
-    username: 'brave123'
+    username: 'brave123',
+    links: {}
   }
 
   const nextPaymentDate = getNextPaymentDate(
