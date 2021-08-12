@@ -10,17 +10,15 @@
 
 namespace content_settings {
 
-// Helper to allow patchless ephemeral storage access in Chromium code.
-class ScopedEphemeralStorageAwareness {
- public:
-  explicit ScopedEphemeralStorageAwareness(bool* ephemeral_storage_aware);
-  ScopedEphemeralStorageAwareness(ScopedEphemeralStorageAwareness&&);
-  ScopedEphemeralStorageAwareness& operator=(ScopedEphemeralStorageAwareness&&);
-  ~ScopedEphemeralStorageAwareness();
-
- private:
-  base::AutoReset<bool> ephemeral_storage_aware_auto_reset_;
+enum class EphemeralStorageAwareType {
+  kNone,
+  kAware,
+  kNotAwareButAllowIn1pEphemeralMode,
 };
+
+// Helper to allow patchless ephemeral storage access in Chromium code.
+using ScopedEphemeralStorageAwareness =
+    base::AutoReset<EphemeralStorageAwareType>;
 
 }  // namespace content_settings
 
@@ -28,8 +26,8 @@ class ScopedEphemeralStorageAwareness {
   bool ShouldUseEphemeralStorage(                                         \
       const GURL& url, const GURL& site_for_cookies,                      \
       const absl::optional<url::Origin>& top_frame_origin) const;         \
-  ScopedEphemeralStorageAwareness CreateScopedEphemeralStorageAwareness() \
-      const;                                                              \
+  ScopedEphemeralStorageAwareness CreateScopedEphemeralStorageAwareness(  \
+      EphemeralStorageAwareType type) const;                              \
   bool IsEphemeralCookieAccessAllowed(const GURL& url,                    \
                                       const GURL& first_party_url) const; \
   bool IsEphemeralCookieAccessAllowed(                                    \
@@ -46,7 +44,8 @@ class ScopedEphemeralStorageAwareness {
       const GURL& url, const GURL& site_for_cookies,                      \
       const absl::optional<url::Origin>& top_frame_origin) const;         \
                                                                           \
-  mutable bool ephemeral_storage_aware_ = false;
+  mutable EphemeralStorageAwareType ephemeral_storage_aware_ =            \
+      EphemeralStorageAwareType::kNone;
 
 #include "../../../../../../components/content_settings/core/common/cookie_settings_base.h"
 

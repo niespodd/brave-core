@@ -13,6 +13,9 @@
   bool OnCanSetCookie_ChromiumImpl(                                       \
       const net::URLRequest& request, const net::CanonicalCookie& cookie, \
       net::CookieOptions* options, bool allowed_from_caller);             \
+  bool OnForcePrivacyMode_ChromiumImpl(                                   \
+      const GURL& url, const net::SiteForCookies& site_for_cookies,       \
+      const absl::optional<url::Origin>& top_frame_origin) const;         \
   void FinishedCanSendReportingReports
 
 #include "../../../../services/network/network_service_network_delegate.h"

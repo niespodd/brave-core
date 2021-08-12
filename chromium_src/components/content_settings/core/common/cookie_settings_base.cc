@@ -89,15 +89,6 @@ bool IsFirstPartyAccessAllowed(
 
 }  // namespace
 
-ScopedEphemeralStorageAwareness::ScopedEphemeralStorageAwareness(
-    bool* ephemeral_storage_aware)
-    : ephemeral_storage_aware_auto_reset_(ephemeral_storage_aware, true) {}
-ScopedEphemeralStorageAwareness::~ScopedEphemeralStorageAwareness() = default;
-ScopedEphemeralStorageAwareness::ScopedEphemeralStorageAwareness(
-    ScopedEphemeralStorageAwareness&& rhs) = default;
-ScopedEphemeralStorageAwareness& ScopedEphemeralStorageAwareness::operator=(
-    ScopedEphemeralStorageAwareness&& rhs) = default;
-
 bool CookieSettingsBase::ShouldUseEphemeralStorage(
     const GURL& url,
     const GURL& site_for_cookies,
@@ -131,8 +122,9 @@ bool CookieSettingsBase::ShouldUseEphemeralStorage(
 }
 
 ScopedEphemeralStorageAwareness
-CookieSettingsBase::CreateScopedEphemeralStorageAwareness() const {
-  return ScopedEphemeralStorageAwareness(&ephemeral_storage_aware_);
+CookieSettingsBase::CreateScopedEphemeralStorageAwareness(
+    EphemeralStorageAwareType type) const {
+  return ScopedEphemeralStorageAwareness(&ephemeral_storage_aware_, type);
 }
 
 bool CookieSettingsBase::IsEphemeralCookieAccessAllowed(
@@ -146,7 +138,7 @@ bool CookieSettingsBase::IsEphemeralCookieAccessAllowed(
     const GURL& site_for_cookies,
     const absl::optional<url::Origin>& top_frame_origin) const {
   auto scoped_ephemeral_storage_awareness =
-      CreateScopedEphemeralStorageAwareness();
+      CreateScopedEphemeralStorageAwareness(EphemeralStorageAwareType::kAware);
   return IsCookieAccessAllowed(url, site_for_cookies, top_frame_origin);
 }
 
@@ -160,7 +152,7 @@ bool CookieSettingsBase::IsCookieAccessAllowed(
     const GURL& url,
     const GURL& site_for_cookies,
     const absl::optional<url::Origin>& top_frame_origin) const {
-  if (ephemeral_storage_aware_ &&
+  if (ephemeral_storage_aware_ == EphemeralStorageAwareType::kAware &&
       ShouldUseEphemeralStorage(url, site_for_cookies, top_frame_origin)) {
     return true;
   }
@@ -185,8 +177,11 @@ bool CookieSettingsBase::IsCookieAccessAllowedImpl(
   const bool is_1p_ephemeral =
       is_1p_ephemeral_feature_enabled && IsCookieSessionOnly(first_party_url);
 
-  if (is_1p_ephemeral && allow)
+  if (is_1p_ephemeral && allow &&
+      ephemeral_storage_aware_ !=
+          EphemeralStorageAwareType::kNotAwareButAllowIn1pEphemeralMode) {
     return false;
+  }
 
   if (!IsFirstPartyAccessAllowed(first_party_url, this))
     return false;
