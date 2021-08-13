@@ -840,5 +840,37 @@
         "content": "$2"
       }
     }
+  },
+  "braveTalkTurnOnRewardsToStartCall": {
+    "message": "To start a free call, turn on Brave Rewards",
+    "description": ""
+  },
+  "braveTalkBraveRewardsDescription": {
+    "message": "With Brave Rewards, you earn tokens for viewing private ads (your data is safe). Turn those tokens into cash, gift cards…or even tip the websites you love. No tracking. No slow downs.",
+    "description": ""
+  },
+  "braveTalkTurnOnRewards": {
+    "message": "Turn on Rewards",
+    "description": ""
+  },
+  "braveTalkTurnOnPrivateAdsToStartCall": {
+    "message": "To start a free call, enable Brave Private Ads",
+    "description": ""
+  },
+  "braveTalkPrivateAdsDescription": {
+    "message": "With Brave Private Ads, you earn tokens for viewing private ads (your data is safe). Turn those tokens into cash, gift cards…or even tip the websites you love. No tracking. No slow downs.",
+    "description": ""
+  },
+  "braveTalkTurnOnPrivateAds": {
+    "message": "Turn on Brave Private Ads",
+    "description": ""
+  },
+  "braveTalkCanStartFreeCall": {
+    "message": "You can now start a free call",
+    "description": ""
+  },
+  "braveTalkClickAnywhereToBraveTalk": {
+    "message": "Click anywhere on the screen to continue to Brave Talk.",
+    "description": ""
   }
 }

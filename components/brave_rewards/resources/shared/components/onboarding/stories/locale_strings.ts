@@ -45,5 +45,15 @@ export const localeStrings = {
   onboardingPanelVerifyNow: 'Verify my wallet',
   onboardingPanelBitflyerNote: 'The bitFlyer wallet is a service managed by bitFlyer, Inc.',
   onboardingPanelBitflyerText: 'By verifying your wallet and linking it to a bitFlyer account, you will be able to store and manage the tokens you have earned through Brave Rewards more easily',
-  onboardingPanelBitflyerLearnMore: '$1Learn more$2 about how to link your Brave browser with your bitFlyer account.'
+  onboardingPanelBitflyerLearnMore: '$1Learn more$2 about how to link your Brave browser with your bitFlyer account.',
+
+  // Brave talk onboarding panel messages:
+  braveTalkBraveRewardsDescription: 'With Brave Rewards, you earn tokens for viewing private ads (your data is safe). Turn those tokens into cash, gift cards…or even tip the websites you love. No tracking. No slow downs.',
+  braveTalkCanStartFreeCall: 'You can now start a free call',
+  braveTalkClickAnywhereToBraveTalk: 'Click anywhere on the screen to continue to Brave Talk.',
+  braveTalkTurnOnRewards: 'Turn on Rewards',
+  braveTalkTurnOnRewardsToStartCall: 'To start a free call, turn on Brave Rewards',
+  braveTalkTurnOnPrivateAdsToStartCall: 'To start a free call, enable Brave Private Ads',
+  braveTalkPrivateAdsDescription: 'With Brave Private Ads, you earn tokens for viewing private ads (your data is safe). Turn those tokens into cash, gift cards…or even tip the websites you love. No tracking. No slow downs.',
+  braveTalkTurnOnPrivateAds: 'Turn on Brave Private Ads'
 }
