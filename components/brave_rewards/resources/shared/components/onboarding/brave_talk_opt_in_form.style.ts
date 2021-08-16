@@ -45,6 +45,7 @@ export const text = styled.div`
 
 export const enable = styled.div`
   margin-top: 25px;
+  margin-bottom: 15px;
 
   button {
     min-width: 330px;
@@ -52,7 +53,7 @@ export const enable = styled.div`
 `
 
 export const terms = styled.div`
-  margin: 50px 14px 15px;
+  margin: 15px 14px 15px;
   color: var(--brave-palette-neutral600);
   font-size: 11px;
   line-height: 16px;
@@ -62,4 +63,17 @@ export const terms = styled.div`
     font-weight: 600;
     text-decoration: none;
   }
+`
+
+export const learn = styled.div`
+  margin: 20px 14px 15px;
+  color: var(--brave-palette-neutral700);
+  font-size: 14px;
+  line-height: 24px;
+`
+
+export const tour = styled.div`
+  color: var(--brave-color-brandBat);
+  cursor: pointer;
+  text-decoration: none;
 `

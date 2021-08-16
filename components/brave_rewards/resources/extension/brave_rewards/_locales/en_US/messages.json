@@ -853,6 +853,24 @@
     "message": "Turn on Rewards",
     "description": ""
   },
+  "braveTalkOptInTerms": {
+    "message": "By clicking, you agree to the $tos_link_begin$Terms of Service$tos_link_end$ and $pp_link_begin$Privacy Policy$pp_link_end$. Disable any time in Settings.",
+    "description": "",
+    "placeholders": {
+      "tos_link_begin": {
+        "content": "$1"
+      },
+      "tos_link_end": {
+        "content": "$2"
+      },
+      "pp_link_begin": {
+        "content": "$3"
+      },
+      "pp_link_end": {
+        "content": "$4"
+      }
+    }
+  },
   "braveTalkTurnOnPrivateAdsToStartCall": {
     "message": "To start a free call, enable Brave Private Ads",
     "description": ""
@@ -871,6 +889,14 @@
   },
   "braveTalkClickAnywhereToBraveTalk": {
     "message": "Click anywhere on the screen to continue to Brave Talk.",
+    "description": ""
+  },
+  "braveTalkWantLearnMore": {
+    "message": "Want to learn more about Brave Rewards?",
+    "description": ""
+  },
+  "braveTalkRewardsTour": {
+    "message": "Take a quick tour.",
     "description": ""
   }
 }

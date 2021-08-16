@@ -4,8 +4,8 @@
 
 import * as React from 'react'
 
-import { LocaleContext } from '../../lib/locale_context'
-import { TermsOfService } from '../terms_of_service'
+import { LocaleContext, formatMessage } from '../../lib/locale_context'
+import { NewTabLink } from '../new_tab_link'
 import { MainButton } from './main_button'
 
 import { CheckCircleIcon } from './icons/check_circle'
@@ -13,9 +13,13 @@ import { CashbackIcon } from './icons/cashback'
 
 import * as style from './brave_talk_opt_in_form.style'
 
+const termsOfServiceURL = 'https://brave.com/terms-of-use'
+const privacyPolicyURL = 'https://brave.com/privacy/browser'
+
 interface Props {
   showRewardsOnboarding: boolean
   onEnable: () => void
+  onRewardsTourClicked: () => void
 }
 
 export function BraveTalkOptInForm (props: Props) {
@@ -37,9 +41,12 @@ export function BraveTalkOptInForm (props: Props) {
         <style.text>
           {getString('braveTalkClickAnywhereToBraveTalk')}
         </style.text>
-        <style.terms>
-          <TermsOfService />
-        </style.terms>
+        <style.learn>
+          {getString('braveTalkWantLearnMore')}
+          <style.tour onClick={props.onRewardsTourClicked}>
+            {getString('braveTalkRewardsTour')}
+          </style.tour>
+        </style.learn>
       </style.root>
     )
   } else if (props.showRewardsOnboarding) {
@@ -58,7 +65,22 @@ export function BraveTalkOptInForm (props: Props) {
           </MainButton>
         </style.enable>
         <style.terms>
-          <TermsOfService />
+          {
+            formatMessage(getString('braveTalkOptInTerms'), {
+              tags: {
+                $1: (content) => (
+                  <NewTabLink key='terms' href={termsOfServiceURL}>
+                    {content}
+                  </NewTabLink>
+                ),
+                $3: (content) => (
+                  <NewTabLink key='privacy' href={privacyPolicyURL}>
+                    {content}
+                  </NewTabLink>
+                )
+              }
+            })
+          }
         </style.terms>
       </style.root>
     )
@@ -78,9 +100,6 @@ export function BraveTalkOptInForm (props: Props) {
           {getString('braveTalkTurnOnPrivateAds')}
         </MainButton>
       </style.enable>
-      <style.terms>
-        <TermsOfService />
-      </style.terms>
     </style.root>
   )
 }

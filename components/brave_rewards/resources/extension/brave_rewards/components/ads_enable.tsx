@@ -10,6 +10,8 @@ import { BraveTalkOptInForm } from '../../../shared/components/onboarding/brave_
 
 import * as rewardsPanelActions from '../actions/rewards_panel_actions'
 
+const rewardsTourURL = 'brave_rewards_panel.html#tour'
+
 interface Props extends RewardsExtension.ComponentProps {
 }
 
@@ -48,10 +50,15 @@ export class AdsEnablePanel extends React.Component<Props, State> {
       chrome.braveRewards.enableRewards()
     }
 
+    const onRewardsTourClicked = () => {
+      window.location.href = rewardsTourURL
+    }
+
     return (
       <BraveTalkOptInForm
         showRewardsOnboarding={this.props.rewardsPanelData.showOnboarding}
         onEnable={onEnable}
+        onRewardsTourClicked={onRewardsTourClicked}
       />
     )
   }
