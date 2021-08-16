@@ -122,6 +122,16 @@ export class RewardsPanel extends React.Component<Props, State> {
     })
   }
 
+  getForceShowRewardsTour = () => {
+    const hash = window && window.location && window.location.hash
+
+    if (!hash || !hash.startsWith('#tour')) {
+      return false
+    }
+
+    return true
+  }
+
   getCurrentTab (callback: ((tab: chrome.tabs.Tab) => void)) {
     chrome.tabs.query({
       active: true,
@@ -166,7 +176,12 @@ export class RewardsPanel extends React.Component<Props, State> {
   }
 
   render () {
-    return <Panel tabId={this.state.tabId} />
+    return (
+      <Panel
+        tabId={this.state.tabId}
+        forceShowRewardsTour={this.getForceShowRewardsTour()}
+      />
+    )
   }
 }
 

@@ -23,6 +23,7 @@ import { getMessage } from '../background/api/locale_api'
 
 interface Props extends RewardsExtension.ComponentProps {
   tabId: number
+  forceShowRewardsTour: boolean
 }
 
 interface State {
@@ -42,7 +43,7 @@ export class Panel extends React.Component<Props, State> {
     super(props)
     this.state = {
       showSummary: true,
-      showRewardsTour: false,
+      showRewardsTour: props.forceShowRewardsTour,
       firstTimeSetup: false,
       publisherKey: null,
       refreshingPublisher: false,
