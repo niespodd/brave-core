@@ -24,31 +24,17 @@ BraveAdsJSHandler::BraveAdsJSHandler(content::RenderFrame* render_frame)
 
 BraveAdsJSHandler::~BraveAdsJSHandler() = default;
 
-bool BraveAdsJSHandler::EnsureConnected() {
-  if (!brave_ads_.is_bound()) {
-    render_frame_->GetBrowserInterfaceBroker()->GetInterface(
-        brave_ads_.BindNewPipeAndPassReceiver());
-  }
-
-  return brave_ads_.is_bound();
-}
-
 void BraveAdsJSHandler::AddJavaScriptObjectToFrame(
     v8::Local<v8::Context> context) {
   v8::Isolate* isolate = blink::MainThreadIsolate();
   v8::HandleScope handle_scope(isolate);
-  if (context.IsEmpty())
+  if (context.IsEmpty()) {
     return;
+  }
 
   v8::Context::Scope context_scope(context);
 
   BindFunctionsToObject(isolate, context);
-}
-
-void BraveAdsJSHandler::ResetRemote(content::RenderFrame* render_frame) {
-  render_frame_ = render_frame;
-  brave_ads_.reset();
-  EnsureConnected();
 }
 
 void BraveAdsJSHandler::BindFunctionsToObject(v8::Isolate* isolate,
@@ -87,10 +73,27 @@ void BraveAdsJSHandler::BindFunctionToObject(
       .Check();
 }
 
+bool BraveAdsJSHandler::EnsureConnected() {
+  if (!brave_ads_.is_bound()) {
+    render_frame_->GetBrowserInterfaceBroker()->GetInterface(
+        brave_ads_.BindNewPipeAndPassReceiver());
+    brave_ads_.set_disconnect_handler(base::BindOnce(
+        &BraveAdsJSHandler::OnRemoteDisconnect, base::Unretained(this)));
+  }
+
+  return brave_ads_.is_bound();
+}
+
+void BraveAdsJSHandler::OnRemoteDisconnect() {
+  brave_ads_.reset();
+  EnsureConnected();
+}
+
 v8::Local<v8::Promise> BraveAdsJSHandler::RequestAdsEnabled(
     v8::Isolate* isolate) {
-  if (!EnsureConnected())
+  if (!EnsureConnected()) {
     return v8::Local<v8::Promise>();
+  }
 
   v8::MaybeLocal<v8::Promise::Resolver> resolver =
       v8::Promise::Resolver::New(isolate->GetCurrentContext());

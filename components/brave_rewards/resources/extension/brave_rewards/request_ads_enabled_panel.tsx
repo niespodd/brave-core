@@ -9,7 +9,6 @@ import { Store } from 'webext-redux'
 
 import Theme from 'brave-ui/theme/brave-default'
 import { ThemeProvider } from 'styled-components'
-import { initLocale } from 'brave-ui/helpers'
 require('emptykit.css')
 require('../../../../../ui/webui/resources/fonts/muli.css')
 require('../../../../../ui/webui/resources/fonts/poppins.css')
@@ -21,7 +20,7 @@ import { WithThemeVariables } from '../../shared/components/with_theme_variables
 import AdsEnablePanel from './components/ads_enable'
 
 // Utils
-import { getMessage, getUIMessages } from './background/api/locale_api'
+import { getMessage } from './background/api/locale_api'
 
 const store: Store<RewardsExtension.State> = new Store({
   portName: 'REWARDSPANEL'
@@ -29,16 +28,10 @@ const store: Store<RewardsExtension.State> = new Store({
 
 const localeContext = {
   getString: (key: string) => {
-    // In order to normalize messages across extensions and WebUI, replace all
-    // chrome.i18n message placeholders with $N marker patterns. UI components
-    // are responsible for replacing these markers with appropriate text or
-    // using the markers to build HTML.
     const subsitutions = ['$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9']
     return getMessage(key, subsitutions)
   }
 }
-
-initLocale(getUIMessages())
 
 store.ready().then(
   () => {

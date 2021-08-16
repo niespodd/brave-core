@@ -17,8 +17,6 @@ namespace features {
 
 extern const base::Feature kAdNotifications;
 
-extern const base::Feature kRequestAdsEnabledApi;
-
 bool IsAdNotificationsEnabled();
 int AdNotificationTimeout();
 
@@ -33,10 +31,11 @@ double AdNotificationNormalizedDisplayCoordinateX();
 int AdNotificationInsetX();
 double AdNotificationNormalizedDisplayCoordinateY();
 int AdNotificationInsetY();
+#endif  // !defined(OS_ANDROID)
+
+extern const base::Feature kRequestAdsEnabledApi;
 
 bool IsRequestAdsEnabledApiEnabled();
-
-#endif  // !defined(OS_ANDROID)
 
 }  // namespace features
 }  // namespace brave_ads

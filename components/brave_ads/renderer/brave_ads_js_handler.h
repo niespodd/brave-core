@@ -28,7 +28,6 @@ class BraveAdsJSHandler final {
   ~BraveAdsJSHandler();
 
   void AddJavaScriptObjectToFrame(v8::Local<v8::Context> context);
-  void ResetRemote(content::RenderFrame* render_frame);
 
  private:
   // Adds a function to the provided object.
@@ -40,6 +39,7 @@ class BraveAdsJSHandler final {
   void BindFunctionsToObject(v8::Isolate* isolate,
                              v8::Local<v8::Context> context);
   bool EnsureConnected();
+  void OnRemoteDisconnect();
 
   // A function to be called from JS
   v8::Local<v8::Promise> RequestAdsEnabled(v8::Isolate* isolate);

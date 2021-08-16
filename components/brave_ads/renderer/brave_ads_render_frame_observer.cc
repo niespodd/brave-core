@@ -35,7 +35,9 @@ bool IsAllowedHost(const GURL& url) {
 BraveAdsRenderFrameObserver::BraveAdsRenderFrameObserver(
     content::RenderFrame* render_frame,
     int32_t world_id)
-    : RenderFrameObserver(render_frame), world_id_(world_id) {}
+    : RenderFrameObserver(render_frame), world_id_(world_id) {
+  native_javascript_handle_ = std::make_unique<BraveAdsJSHandler>(render_frame);
+}
 
 BraveAdsRenderFrameObserver::~BraveAdsRenderFrameObserver() {}
 
@@ -50,13 +52,6 @@ void BraveAdsRenderFrameObserver::DidCreateScriptContext(
 
   if (!IsAllowedHost(url))
     return;
-
-  if (!native_javascript_handle_) {
-    native_javascript_handle_ =
-        std::make_unique<BraveAdsJSHandler>(render_frame());
-  } else {
-    native_javascript_handle_->ResetRemote(render_frame());
-  }
 
   native_javascript_handle_->AddJavaScriptObjectToFrame(context);
 }

@@ -153,11 +153,11 @@ int AdNotificationInsetY() {
       kDefaultAdNotificationInsetY);
 }
 
+#endif  // !defined(OS_ANDROID)
+
 bool IsRequestAdsEnabledApiEnabled() {
   return base::FeatureList::IsEnabled(kRequestAdsEnabledApi);
 }
-
-#endif  // !defined(OS_ANDROID)
 
 }  // namespace features
 }  // namespace brave_ads
