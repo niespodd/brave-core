@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "base/json/json_reader.h"
 #include "brave/browser/brave_wallet/brave_wallet_tab_helper.h"
 #include "brave/components/brave_wallet/browser/brave_wallet_utils.h"
 #include "brave/components/brave_wallet/browser/eth_response_parser.h"
@@ -17,6 +18,14 @@
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/web_contents.h"
 
+namespace {
+// From https://eips.ethereum.org/EIPS/eip-3085
+const char kRejectedResponse[] = R"(
+    "error": {
+    "code": 4001,
+    "message": "The user rejected the request."
+  })";
+}
 
 WalletPanelHandler::WalletPanelHandler(
     mojo::PendingReceiver<brave_wallet::mojom::PanelHandler> receiver,
@@ -43,31 +52,28 @@ void WalletPanelHandler::CloseUI() {
 }
 
 void WalletPanelHandler::AddEthereumChainApproved(const std::string& payload,
-                                                  const std::string& origin,
                                                   int32_t tab_id) {
-  DLOG(INFO) << "AddEthereumChainApproved:" << payload;
   content::WebContents* contents = get_web_contents_for_tab_.Run(tab_id);
   if (!contents)
     return;
-  
-  auto* prefs = user_prefs::UserPrefs::Get(contents->GetBrowserContext());
-  ListPrefUpdate update(prefs, kBraveWalletCustomNetworks);
-  base::ListValue* list = update.Get();
-  brave_wallet::AddEthereumChainParameter chainData;
-  if (!ParseAddEthereumChainParameter(payload, &chainData))
-    return;
-
-  base::Value value = brave_wallet::EthereumChainToValue(chainData);
-  list->Append(std::move(value));
-
+  {
+    auto* prefs = user_prefs::UserPrefs::Get(contents->GetBrowserContext());
+    ListPrefUpdate update(prefs, kBraveWalletCustomNetworks);
+    base::ListValue* list = update.Get();
+    absl::optional<base::Value> value = base::JSONReader::Read(payload);
+    list->Append(std::move(value).value_or(base::Value()));
+  }
   brave_wallet::BraveWalletTabHelper::FromWebContents(contents)
-        ->UserRequestApproved(payload);
+    ->UserRequestCompleted(payload, std::string());
 }
 
 void WalletPanelHandler::AddEthereumChainCanceled(const std::string& payload,
-                                                  const std::string& origin,
                                                   int32_t tab_id) {
-DLOG(INFO) << "AddEthereumChainCanceled:" << payload;
+  content::WebContents* contents = get_web_contents_for_tab_.Run(tab_id);
+  if (!contents)
+    return;
+  brave_wallet::BraveWalletTabHelper::FromWebContents(contents)
+    ->UserRequestCompleted(payload, kRejectedResponse);
 }
 
 void WalletPanelHandler::ConnectToSite(const std::vector<std::string>& accounts,

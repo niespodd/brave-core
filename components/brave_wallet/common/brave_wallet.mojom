@@ -55,8 +55,8 @@ interface PanelHandler {
   // Notify the backend that the dialog should be closed.
   CloseUI();
 
-  AddEthereumChainApproved(string network, string origin, int32 tab_id);
-  AddEthereumChainCanceled(string network, string origin, int32 tab_id);
+  AddEthereumChainApproved(string network, int32 tab_id);
+  AddEthereumChainCanceled(string EthereumChain, int32 tab_id);
 
   ConnectToSite(array<string> accounts, string origin, int32 tab_id);
   CancelConnectToSite(string origin, int32 tab_id);
@@ -207,23 +207,35 @@ interface SwapController {
       (bool success, SwapResponse response);
 };
 
-enum Network {
-  Mainnet,
-  Rinkeby,
-  Ropsten,
-  Goerli,
-  Kovan,
-  Localhost,
-  Custom
+struct KnownNetwork {
+  string chain_id;
+  string chainName;
+  string subdomain;
+  string block_tracker_url;
 };
 
 interface EthJsonRpcControllerObserver {
   ChainChangedEvent(string chain_id);
 };
 
+struct NativeCurrency {
+  string symbol;
+  string name;
+  int32 decimals;
+};
+
+struct EthereumChain {
+  string chainId;
+  string chainName;
+  array<string>? blockExplorerUrls;
+  array<string>? iconUrls;
+  array<string> rpcUrls;
+  NativeCurrency? currency;
+};
+
 interface EthJsonRpcController {
-  SetNetwork(Network network);
-  GetNetwork() => (Network network);
+  SetNetwork(string chain_id);
+  GetAllNetworks() => (array<EthereumChain> networks);
   GetChainId() => (string chainId);
   GetBlockTrackerUrl() => (string blockTrackerUrl);
   GetNetworkUrl() => (string networkUrl);
@@ -234,5 +246,5 @@ interface EthJsonRpcController {
   EnsProxyReaderGetResolverAddress(string contract_address, string domain) => (bool status, string result);
   Request(string json_payload, bool auto_retry_on_network_change) => (int32 http_code, string response, map<string, string> headers);
   AddObserver(pending_remote<EthJsonRpcControllerObserver> observer);
-  SetCustomNetwork(url.mojom.Url provider_url);
+  SetCustomNetworkForTesting(string chain_id, url.mojom.Url provider_url);
 };

@@ -36,7 +36,7 @@ EthTxStateManager::EthTxStateManager(
   rpc_controller_.set_disconnect_handler(base::BindOnce(
       &EthTxStateManager::OnConnectionError, weak_factory_.GetWeakPtr()));
   rpc_controller_->AddObserver(observer_receiver_.BindNewPipeAndPassRemote());
-  rpc_controller_->GetNetwork(base::BindOnce(&EthTxStateManager::OnGetNetwork,
+  rpc_controller_->GetChainId(base::BindOnce(&EthTxStateManager::OnGetChainId,
                                              weak_factory_.GetWeakPtr()));
 }
 EthTxStateManager::~EthTxStateManager() = default;
@@ -243,37 +243,23 @@ EthTxStateManager::GetTransactionsByStatus(TransactionStatus status,
 }
 
 void EthTxStateManager::ChainChangedEvent(const std::string& chain_id) {
-  rpc_controller_->GetNetwork(base::BindOnce(&EthTxStateManager::OnGetNetwork,
+  rpc_controller_->GetChainId(base::BindOnce(&EthTxStateManager::OnGetChainId,
                                              weak_factory_.GetWeakPtr()));
 }
 
 std::string EthTxStateManager::GetNetworkId() const {
+  auto networks = GetAllNetworks(prefs_);
   std::string id;
-
-  switch (network_) {
-    case brave_wallet::mojom::Network::Mainnet:
-      id = "mainnet";
-      break;
-    case brave_wallet::mojom::Network::Rinkeby:
-      id = "rinkeby";
-      break;
-    case brave_wallet::mojom::Network::Ropsten:
-      id = "ropsten";
-      break;
-    case brave_wallet::mojom::Network::Goerli:
-      id = "goerli";
-      break;
-    case brave_wallet::mojom::Network::Kovan:
-      id = "kovan";
-      break;
-    case brave_wallet::mojom::Network::Localhost:
-      id = network_url_;
-      break;
-    case brave_wallet::mojom::Network::Custom:
-    default:
-      NOTREACHED();
+  for (const auto& network : networks) {
+    if (network.chain_id != chain_id_)
+      continue;
+    if (network.rpc_urls.size()) {
+      id = GURL(network.rpc_urls.front()).host();
+    } else {
+      id = chain_id_;
+    }
+    break;
   }
-
   return id;
 }
 
@@ -311,13 +297,10 @@ void EthTxStateManager::OnGetNetworkUrl(const std::string& url) {
   network_url_ = url;
 }
 
-void EthTxStateManager::OnGetNetwork(mojom::Network network) {
-  network_ = network;
-  if (network_ == brave_wallet::mojom::Network::Localhost ||
-      network_ == brave_wallet::mojom::Network::Custom) {
-    rpc_controller_->GetNetworkUrl(base::BindOnce(
-        &EthTxStateManager::OnGetNetworkUrl, weak_factory_.GetWeakPtr()));
-  }
+void EthTxStateManager::OnGetChainId(const std::string& chain_id) {
+  chain_id_ = chain_id;
+  rpc_controller_->GetNetworkUrl(base::BindOnce(
+      &EthTxStateManager::OnGetNetworkUrl, weak_factory_.GetWeakPtr()));
 }
 
 }  // namespace brave_wallet

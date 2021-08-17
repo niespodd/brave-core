@@ -86,12 +86,12 @@ class EthTxStateManager : public mojom::EthJsonRpcControllerObserver {
 
   void OnConnectionError();
   void OnGetNetworkUrl(const std::string& url);
-  void OnGetNetwork(mojom::Network network);
+  void OnGetChainId(const std::string& chain_id);
 
   PrefService* prefs_;
   mojo::Remote<mojom::EthJsonRpcController> rpc_controller_;
   mojo::Receiver<mojom::EthJsonRpcControllerObserver> observer_receiver_{this};
-  mojom::Network network_ = brave_wallet::mojom::Network::Mainnet;
+  std::string chain_id_;
   std::string network_url_;
   base::WeakPtrFactory<EthTxStateManager> weak_factory_;
 };

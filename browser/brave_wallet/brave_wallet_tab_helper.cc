@@ -6,6 +6,7 @@
 #include "brave/browser/brave_wallet/brave_wallet_tab_helper.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "brave/common/webui_url_constants.h"
@@ -34,30 +35,33 @@ void BraveWalletTabHelper::ShowBubble() {
   wallet_bubble_manager_delegate_->ShowBubble();
 }
 
-void BraveWalletTabHelper::UserRequestApproved(const std::string& requestData) {
+void BraveWalletTabHelper::UserRequestCompleted(const std::string& requestData,
+                                                const std::string& result) {
   size_t hash = base::FastHash(base::as_bytes(base::make_span(requestData)));
   DCHECK(request_callbacks_.count(hash));
-  std::move(request_callbacks_[hash]).Run(std::vector<std::string>(1,{"done"}));
+  std::move(request_callbacks_[hash]).Run(result);
   request_callbacks_.erase(hash);
 }
 
-void BraveWalletTabHelper::RequestUserApproval(const std::string& requestData,
-    BraveWalletProviderDelegate::RequestEthereumPermissionsCallback callback) {
+void BraveWalletTabHelper::RequestUserApproval(
+    const std::string& requestData,
+    RequestEthereumChainCallback callback) {
   std::string requesting_origin;
   std::vector<std::string> accounts;
   auto* manager =
       permissions::PermissionRequestManager::FromWebContents(web_contents_);
   DCHECK(manager);
 
-  requesting_origin = "someorigin";
-
   int32_t tab_id = sessions::SessionTabHelper::IdForTab(web_contents_).id();
-  GURL webui_url = brave_wallet::GetConnectWithPayloadWebUIURL(
-      GetBubbleURL(), tab_id, requesting_origin, requestData);
+  GURL webui_url = brave_wallet::GetAddEthereumChainPayloadWebUIURL(
+      GURL(kBraveUIWalletPanelURL), tab_id, requesting_origin, requestData);
   DCHECK(webui_url.is_valid());
-  
+
   size_t hash = base::FastHash(base::as_bytes(base::make_span(requestData)));
-  DCHECK(!request_callbacks_.count(hash));
+  if (request_callbacks_.count(hash)) {
+    // UserRequestCompleted(requestData, std::string());
+    // return;
+  }
   request_callbacks_[hash] = std::move(callback);
 
   wallet_bubble_manager_delegate_ =
