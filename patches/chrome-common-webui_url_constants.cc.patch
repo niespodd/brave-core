@@ -1,0 +1,12 @@
+diff --git a/chrome/common/webui_url_constants.cc b/chrome/common/webui_url_constants.cc
+index 8c48088f9fea5c0c12f9dfce5d4109dee12e5ccf..ce01337769943a22c4eeb85a14ba72156f1959ad 100644
+--- a/chrome/common/webui_url_constants.cc
++++ b/chrome/common/webui_url_constants.cc
+@@ -495,6 +495,7 @@ const char kExtensionConfigureCommandsSubPage[] = "configureCommands";
+ // Add hosts here to be included in chrome://chrome-urls (about:about).
+ // These hosts will also be suggested by BuiltinProvider.
+ const char* const kChromeHostURLs[] = {
++    BRAVE_HOST_URLS
+     kChromeUIAboutHost,
+     kChromeUIAccessibilityHost,
+     kChromeUIAutofillInternalsHost,
