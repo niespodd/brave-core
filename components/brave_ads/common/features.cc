@@ -17,7 +17,7 @@ const base::Feature kCustomAdNotifications{"CustomAdNotifications",
                                            base::FEATURE_DISABLED_BY_DEFAULT};
 
 const base::Feature kRequestAdsEnabledApi{"RequestAdsEnabledApi",
-                                          base::FEATURE_DISABLED_BY_DEFAULT};
+                                          base::FEATURE_ENABLED_BY_DEFAULT};
 
 namespace {
 

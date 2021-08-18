@@ -13,7 +13,9 @@
 #include "base/observer_list_types.h"
 #include "bat/ledger/mojom_structs.h"
 
-class Browser;
+namespace content {
+class WebContents;
+}
 
 namespace brave_rewards {
 
@@ -55,7 +57,7 @@ class RewardsServiceObserver : public base::CheckedObserver {
 
   virtual void OnProcessForEnableRewardsStarted() {}
 
-  virtual void OnRewardsPanelClosed(Browser* browser) {}
+  virtual void OnRewardsPanelClosed(content::WebContents* web_contents) {}
 
   virtual void OnAdsEnabled(
       brave_rewards::RewardsService* rewards_service,

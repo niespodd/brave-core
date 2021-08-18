@@ -1702,9 +1702,10 @@ void RewardsServiceImpl::EnableRewards() {
   }
 }
 
-void RewardsServiceImpl::OnRewardsPanelClosed(Browser* browser) {
+void RewardsServiceImpl::OnRewardsPanelClosed(
+    content::WebContents* web_contents) {
   for (auto& observer : observers_) {
-    observer.OnRewardsPanelClosed(browser);
+    observer.OnRewardsPanelClosed(web_contents);
   }
 }
 

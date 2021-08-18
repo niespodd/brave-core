@@ -9,11 +9,21 @@ source_set("brave_ads") {
     "ads_service_factory.h",
     "ads_tab_helper.cc",
     "ads_tab_helper.h",
-    "brave_ads_driver.cc",
-    "brave_ads_driver.h",
-    "brave_ads_driver_private.cc",
-    "brave_ads_driver_private.h",
+    "brave_ads_host_private.cc",
+    "brave_ads_host_private.h",
   ]
+
+  if (is_android) {
+    sources += [
+      "brave_ads_host_android.cc",
+      "brave_ads_host_android.h",
+    ]
+  } else {
+    sources += [
+      "brave_ads_host.cc",
+      "brave_ads_host.h",
+    ]
+  }
 
   deps = [
     "//base",

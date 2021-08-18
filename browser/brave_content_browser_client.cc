@@ -15,6 +15,7 @@
 #include "base/rand_util.h"
 #include "base/system/sys_info.h"
 #include "base/task/post_task.h"
+#include "brave/browser/brave_ads/brave_ads_host_private.h"
 #include "brave/browser/brave_browser_main_extra_parts.h"
 #include "brave/browser/brave_browser_process.h"
 #include "brave/browser/brave_shields/brave_shields_web_contents_observer.h"
@@ -27,6 +28,7 @@
 #include "brave/common/pref_names.h"
 #include "brave/common/webui_url_constants.h"
 #include "brave/components/binance/browser/buildflags/buildflags.h"
+#include "brave/components/brave_ads/common/features.h"
 #include "brave/components/brave_rewards/browser/rewards_protocol_handler.h"
 #include "brave/components/brave_search/browser/brave_search_default_host.h"
 #include "brave/components/brave_search/browser/brave_search_default_host_private.h"
@@ -139,12 +141,6 @@ using extensions::ChromeContentBrowserClientExtensionsPart;
 #include "brave/browser/ftx/ftx_protocol_handler.h"
 #endif
 
-#if BUILDFLAG(BRAVE_ADS_ENABLED)
-#include "brave/browser/brave_ads/brave_ads_driver.h"
-#include "brave/browser/brave_ads/brave_ads_driver_private.h"
-#include "brave/components/brave_ads/common/features.h"
-#endif
-
 #if BUILDFLAG(BRAVE_WALLET_ENABLED)
 #include "brave/browser/brave_wallet/brave_wallet_context_utils.h"
 #include "brave/browser/brave_wallet/rpc_controller_factory.h"
@@ -167,8 +163,11 @@ using extensions::ChromeContentBrowserClientExtensionsPart;
 #endif
 
 #if !defined(OS_ANDROID)
+#include "brave/browser/brave_ads/brave_ads_host.h"
 #include "brave/browser/new_tab/new_tab_shows_navigation_throttle.h"
-#endif
+#else
+#include "brave/browser/brave_ads/brave_ads_host_android.h"
+#endif  // !defined(OS_ANDROID)
 
 namespace {
 
@@ -205,26 +204,30 @@ void BindCosmeticFiltersResources(
       std::move(receiver));
 }
 
-#if BUILDFLAG(BRAVE_ADS_ENABLED)
-void BindBraveAdsDriver(
+void BindBraveAdsHost(
     content::RenderFrameHost* const frame_host,
-    mojo::PendingReceiver<brave_ads::mojom::BraveAdsDriver> receiver) {
+    mojo::PendingReceiver<brave_ads::mojom::BraveAdsHost> receiver) {
   auto* context = frame_host->GetBrowserContext();
   auto* profile = Profile::FromBrowserContext(context);
-  content::WebContents* web_contents =
-      content::WebContents::FromRenderFrameHost(frame_host);
+
   if (brave::IsRegularProfile(profile)) {
+    content::WebContents* web_contents =
+        content::WebContents::FromRenderFrameHost(frame_host);
     mojo::MakeSelfOwnedReceiver(
-        std::make_unique<brave_ads::BraveAdsDriver>(profile, web_contents),
+#if !defined(OS_ANDROID)
+        std::make_unique<brave_ads::BraveAdsHost>(
+#else
+        std::make_unique<brave_ads::BraveAdsHostAndroid>(
+#endif  // !defined(OS_ANDROID)
+            profile, web_contents),
         std::move(receiver));
   } else {
     // Dummy API which always returns false for private contexts.
     mojo::MakeSelfOwnedReceiver(
-        std::make_unique<brave_ads::BraveAdsDriverPrivate>(),
+        std::make_unique<brave_ads::BraveAdsHostPrivate>(),
         std::move(receiver));
   }
 }
-#endif  // BUILDFLAG(BRAVE_ADS_ENABLED)
 
 #if BUILDFLAG(BRAVE_WALLET_ENABLED)
 void MaybeBindBraveWalletProvider(
@@ -363,10 +366,10 @@ void BraveContentBrowserClient::RegisterBrowserInterfaceBindersForFrame(
         base::BindRepeating(&BindBraveSearchDefaultHost));
   }
 
-#if BUILDFLAG(BRAVE_ADS_ENABLED)
-  map->Add<brave_ads::mojom::BraveAdsDriver>(
-      base::BindRepeating(&BindBraveAdsDriver));
-#endif  // BUILDFLAG(BRAVE_ADS_ENABLED)
+  if (brave_ads::features::IsRequestAdsEnabledApiEnabled()) {
+    map->Add<brave_ads::mojom::BraveAdsHost>(
+        base::BindRepeating(&BindBraveAdsHost));
+  }
 
 #if BUILDFLAG(BRAVE_WALLET_ENABLED)
   if (brave_wallet::IsNativeWalletEnabled()) {

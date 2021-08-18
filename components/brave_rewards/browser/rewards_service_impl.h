@@ -317,7 +317,7 @@ class RewardsServiceImpl : public RewardsService,
 
   void EnableRewards() override;
 
-  void OnRewardsPanelClosed(Browser* browser) override;
+  void OnRewardsPanelClosed(content::WebContents* web_contents) override;
 
   void GetMonthlyReport(
       const uint32_t month,

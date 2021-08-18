@@ -21,12 +21,12 @@
 #include "components/sessions/core/session_id.h"
 #include "url/gurl.h"
 
-class Browser;
 class PrefRegistrySimple;
 class Profile;
 
 namespace content {
 class NavigationHandle;
+class WebContents;
 }
 
 namespace brave_rewards {
@@ -203,7 +203,7 @@ class RewardsService : public KeyedService {
   // turn on Ads.
   virtual void EnableRewards() = 0;
 
-  virtual void OnRewardsPanelClosed(Browser* browser) = 0;
+  virtual void OnRewardsPanelClosed(content::WebContents* web_contents) = 0;
 
   virtual void GetBalanceReport(
       const uint32_t month,

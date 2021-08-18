@@ -1,5 +1,5 @@
 module brave_ads.mojom;
 
-interface BraveAdsDriver {
+interface BraveAdsHost {
   RequestAdsEnabled() => (bool result);
 };

@@ -10,7 +10,7 @@
 #include <string>
 
 #include "base/callback.h"
-#include "brave/components/brave_ads/common/brave_ads_driver.mojom.h"
+#include "brave/components/brave_ads/common/brave_ads_host.mojom.h"
 #include "mojo/public/cpp/bindings/remote.h"
 #include "v8/include/v8.h"
 
@@ -50,7 +50,7 @@ class BraveAdsJSHandler final {
       bool response);
 
   content::RenderFrame* render_frame_;
-  mojo::Remote<brave_ads::mojom::BraveAdsDriver> brave_ads_;
+  mojo::Remote<brave_ads::mojom::BraveAdsHost> brave_ads_;
 };
 
 }  // namespace brave_ads

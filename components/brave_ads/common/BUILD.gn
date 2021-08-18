@@ -1,7 +1,7 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 mojom("mojom") {
-  sources = [ "brave_ads_driver.mojom" ]
+  sources = [ "brave_ads_host.mojom" ]
 
   deps = [ "//mojo/public/mojom/base" ]
 }

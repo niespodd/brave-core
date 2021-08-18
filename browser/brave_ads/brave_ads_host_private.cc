@@ -3,17 +3,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "brave/browser/brave_ads/brave_ads_driver_private.h"
+#include "brave/browser/brave_ads/brave_ads_host_private.h"
 
 #include <utility>
 
 namespace brave_ads {
 
-BraveAdsDriverPrivate::BraveAdsDriverPrivate() = default;
+BraveAdsHostPrivate::BraveAdsHostPrivate() = default;
 
-BraveAdsDriverPrivate::~BraveAdsDriverPrivate() = default;
+BraveAdsHostPrivate::~BraveAdsHostPrivate() = default;
 
-void BraveAdsDriverPrivate::RequestAdsEnabled(
+void BraveAdsHostPrivate::RequestAdsEnabled(
     RequestAdsEnabledCallback callback) {
   std::move(callback).Run(false);
 }
