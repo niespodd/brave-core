@@ -48,4 +48,32 @@ SegmentList AdTargeting::GetSegments() const {
   return segments;
 }
 
+SegmentList AdTargeting::GetInterestSegments() const {
+  SegmentList segments;
+
+  if (features::IsTextClassificationEnabled()) {
+    const ad_targeting::model::TextClassification text_classification_model;
+    const SegmentList text_classification_segments =
+        text_classification_model.GetSegments();
+    segments.insert(segments.end(), text_classification_segments.begin(),
+                    text_classification_segments.end());
+  }
+
+  return segments;
+}
+
+SegmentList AdTargeting::GetIntentSegments() const {
+  SegmentList segments;
+
+  if (features::IsPurchaseIntentEnabled()) {
+    const ad_targeting::model::PurchaseIntent purchase_intent_model;
+    const SegmentList purchase_intent_segments =
+        purchase_intent_model.GetSegments();
+    segments.insert(segments.end(), purchase_intent_segments.begin(),
+                    purchase_intent_segments.end());
+  }
+
+  return segments;
+}
+
 }  // namespace ads

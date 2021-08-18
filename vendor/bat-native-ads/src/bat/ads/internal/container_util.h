@@ -6,6 +6,7 @@
 #ifndef BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_CONTAINER_UTIL_H_
 #define BRAVE_VENDOR_BAT_NATIVE_ADS_SRC_BAT_ADS_INTERNAL_CONTAINER_UTIL_H_
 
+#include <algorithm>
 #include <deque>
 #include <vector>
 
@@ -75,6 +76,23 @@ bool CompareAsSets(const T& c1, const T& c2) {
   }
 
   return true;
+}
+
+template <typename T>
+std::vector<T> SetIntersection(const std::vector<T>& lhs,
+                               const std::vector<T>& rhs) {
+  std::vector<T> mutable_lhs = lhs;
+  std::vector<T> mutable_rhs = rhs;
+
+  std::sort(mutable_lhs.begin(), mutable_lhs.end());
+  std::sort(mutable_rhs.begin(), mutable_rhs.end());
+
+  std::vector<T> intersection;
+  std::set_intersection(mutable_lhs.begin(), mutable_lhs.end(),
+                        mutable_rhs.begin(), mutable_rhs.end(),
+                        std::back_inserter(intersection));
+
+  return intersection;
 }
 
 }  // namespace ads

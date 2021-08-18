@@ -5,12 +5,15 @@
 
 #include "bat/ads/internal/ad_serving/ad_notifications/ad_notification_serving.h"
 
+#include <map>
 #include <string>
 
 #include "base/guid.h"
+#include "base/test/scoped_feature_list.h"
 #include "bat/ads/internal/ad_serving/ad_targeting/geographic/subdivision/subdivision_targeting.h"
 #include "bat/ads/internal/ad_targeting/ad_targeting.h"
 #include "bat/ads/internal/database/tables/creative_ad_notifications_database_table.h"
+#include "bat/ads/internal/features/ad_serving/ad_serving_features.h"
 #include "bat/ads/internal/resources/frequency_capping/anti_targeting_resource.h"
 #include "bat/ads/internal/unittest_base.h"
 #include "bat/ads/internal/unittest_util.h"
@@ -166,6 +169,41 @@ TEST_F(BatAdsAdNotificationServingTest,
   EXPECT_CALL(*ads_client_mock_, ShowNotification(_)).Times(0);
 
   // Act
+  ServeAd();
+
+  // Assert
+}
+
+TEST_F(BatAdsAdNotificationServingTest, ServeAdWithAdServingVersion2) {
+  // Arrange
+  RecordUserActivityEvents();
+
+  CreativeAdNotificationList creative_ad_notifications;
+  CreativeAdNotificationInfo creative_ad_notification =
+      GetCreativeAdNotification();
+  creative_ad_notifications.push_back(creative_ad_notification);
+  Save(creative_ad_notifications);
+
+  AdTargeting ad_targeting;
+  ad_targeting::geographic::SubdivisionTargeting subdivision_targeting;
+  resource::AntiTargeting anti_targeting_resource;
+  ad_notifications::AdServing ad_serving(&ad_targeting, &subdivision_targeting,
+                                         &anti_targeting_resource);
+
+  const char kAdServingVersion[] = "ad_serving_version";
+  std::map<std::string, std::string> kAdServingParameters;
+  kAdServingParameters[kAdServingVersion] = 2;
+
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitWithFeaturesAndParameters(
+      {{features::kAdServing, kAdServingParameters}}, {});
+
+  // Act
+  EXPECT_CALL(*ads_client_mock_,
+              ShowNotification(DoesMatchCreativeInstanceId(
+                  creative_ad_notification.creative_instance_id)))
+      .Times(1);
+
   ServeAd();
 
   // Assert

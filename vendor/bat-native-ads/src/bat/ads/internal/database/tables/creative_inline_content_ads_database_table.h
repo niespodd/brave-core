@@ -33,6 +33,10 @@ using GetCreativeInlineContentAdsCallback =
                        const SegmentList& segments,
                        const CreativeInlineContentAdList& ads)>;
 
+using GetCreativeInlineContentAdsForDimensionsCallback =
+    std::function<void(const bool success,
+                       const CreativeInlineContentAdList& ads)>;
+
 namespace database {
 namespace table {
 
@@ -53,6 +57,10 @@ class CreativeInlineContentAds : public Table {
   void GetForSegments(const SegmentList& segments,
                       const std::string& dimensions,
                       GetCreativeInlineContentAdsCallback callback);
+
+  void GetForDimensions(
+      const std::string& dimensions,
+      GetCreativeInlineContentAdsForDimensionsCallback callback);
 
   void GetAll(GetCreativeInlineContentAdsCallback callback);
 
@@ -83,6 +91,10 @@ class CreativeInlineContentAds : public Table {
   void OnGetForSegments(mojom::DBCommandResponsePtr response,
                         const SegmentList& segments,
                         GetCreativeInlineContentAdsCallback callback);
+
+  void OnGetForDimensions(
+      mojom::DBCommandResponsePtr response,
+      GetCreativeInlineContentAdsForDimensionsCallback callback);
 
   void OnGetAll(mojom::DBCommandResponsePtr response,
                 GetCreativeInlineContentAdsCallback callback);

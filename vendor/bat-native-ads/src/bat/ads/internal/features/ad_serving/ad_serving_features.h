@@ -30,6 +30,8 @@ int GetMaximumPromotedContentAdsPerDay();
 int GetBrowsingHistoryMaxCount();
 int GetBrowsingHistoryDaysAgo();
 
+int GetAdServingVersion();
+
 }  // namespace features
 }  // namespace ads
 

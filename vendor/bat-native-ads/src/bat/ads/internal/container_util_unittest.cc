@@ -217,4 +217,44 @@ TEST(BatAdsContainerUtilTest, CompareEmptySets) {
   EXPECT_TRUE(does_equal);
 }
 
+TEST(BatAdsContainerUtilTest, DoesNotMatchEmptySegments) {
+  // Arrange
+  const std::vector<std::string> lhs = {};
+  const std::vector<std::string> rhs = {};
+
+  // Act
+  std::vector<std::string> set_intersection = SetIntersection(lhs, rhs);
+
+  // Assert
+  std::vector<std::string> expected_set_intersection = {};
+  EXPECT_EQ(expected_set_intersection, set_intersection);
+}
+
+TEST(BatAdsContainerUtilTest, DoesNotMatchSegments) {
+  // Arrange
+  const std::vector<std::string> lhs = {"element 1", "element 2"};
+  const std::vector<std::string> rhs = {"element 3"};
+
+  // Act
+  std::vector<std::string> set_intersection = SetIntersection(lhs, rhs);
+
+  // Assert
+  std::vector<std::string> expected_set_intersection = {};
+  EXPECT_EQ(expected_set_intersection, set_intersection);
+}
+
+TEST(BatAdsContainerUtilTest, SetIntersection) {
+  // Arrange
+  const std::vector<std::string> lhs = {"element 2", "element 1"};
+  const std::vector<std::string> rhs = {"element 2"};
+
+  // Act
+  std::vector<std::string> set_intersection = SetIntersection(lhs, rhs);
+
+  // Assert
+  std::vector<std::string> expected_set_intersection = {"element 1",
+                                                        "element 2"};
+  EXPECT_EQ(expected_set_intersection, set_intersection);
+}
+
 }  // namespace ads

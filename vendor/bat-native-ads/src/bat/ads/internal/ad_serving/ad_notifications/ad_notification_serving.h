@@ -47,6 +47,8 @@ class AdServing {
   void StopServingAdsAtRegularIntervals();
 
   void MaybeServeAd();
+  void MaybeServeAdV1();
+  void MaybeServeAdV2();
 
   void OnAdsPerHourChanged();
 
