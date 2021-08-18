@@ -13,7 +13,9 @@
 #include "gin/function_template.h"
 #include "third_party/blink/public/common/browser_interface_broker_proxy.h"
 #include "third_party/blink/public/common/thread_safe_browser_interface_broker_proxy.h"
+#include "third_party/blink/public/platform/web_string.h"
 #include "third_party/blink/public/web/blink.h"
+#include "third_party/blink/public/web/web_console_message.h"
 #include "third_party/blink/public/web/web_local_frame.h"
 #include "third_party/blink/public/web/web_script_source.h"
 
@@ -92,6 +94,17 @@ void BraveAdsJSHandler::OnRemoteDisconnect() {
 v8::Local<v8::Promise> BraveAdsJSHandler::RequestAdsEnabled(
     v8::Isolate* isolate) {
   if (!EnsureConnected()) {
+    return v8::Local<v8::Promise>();
+  }
+
+  auto* web_frame = render_frame_->GetWebFrame();
+  DCHECK(web_frame);
+  if (!web_frame->HasTransientUserActivation()) {
+    const blink::WebString message =
+        "requestAdsEnabled: "
+        "API can only be initiated by a user gesture.";
+    web_frame->AddMessageToConsole(blink::WebConsoleMessage(
+        blink::mojom::ConsoleMessageLevel::kWarning, message));
     return v8::Local<v8::Promise>();
   }
 
