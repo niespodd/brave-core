@@ -5,11 +5,11 @@
 import * as React from 'react'
 
 import { LocaleContext, formatMessage } from '../../lib/locale_context'
-import { NewTabLink } from '../new_tab_link'
 import { MainButton } from './main_button'
+import { NewTabLink } from '../new_tab_link'
 
-import { CheckCircleIcon } from './icons/check_circle'
-import { CashbackIcon } from './icons/cashback'
+import { CashbackIcon } from './icons/cashback_icon'
+import { CheckCircleIcon } from './icons/check_circle_icon'
 
 import * as style from './brave_talk_opt_in_form.style'
 
@@ -17,9 +17,9 @@ const termsOfServiceURL = 'https://brave.com/terms-of-use'
 const privacyPolicyURL = 'https://brave.com/privacy/browser'
 
 interface Props {
-  showRewardsOnboarding: boolean
+  rewardsEnabled: boolean
   onEnable: () => void
-  onRewardsTourClicked: () => void
+  onTakeTour: () => void
 }
 
 export function BraveTalkOptInForm (props: Props) {
@@ -43,45 +43,29 @@ export function BraveTalkOptInForm (props: Props) {
         </style.text>
         <style.learn>
           {getString('braveTalkWantLearnMore')}
-          <style.tour onClick={props.onRewardsTourClicked}>
+          <style.tour onClick={props.onTakeTour}>
             {getString('braveTalkRewardsTour')}
           </style.tour>
         </style.learn>
       </style.root>
     )
-  } else if (props.showRewardsOnboarding) {
+  }
+
+  if (props.rewardsEnabled) {
     return (
       <style.root>
         <CashbackIcon />
         <style.header>
-          {getString('braveTalkTurnOnRewardsToStartCall')}
+          {getString('braveTalkTurnOnPrivateAdsToStartCall')}
         </style.header>
         <style.text>
-          {getString('braveTalkBraveRewardsDescription')}
+          {getString('braveTalkPrivateAdsDescription')}
         </style.text>
         <style.enable>
           <MainButton onClick={onRewardsTurnedOn}>
-            {getString('braveTalkTurnOnRewards')}
+            {getString('braveTalkTurnOnPrivateAds')}
           </MainButton>
         </style.enable>
-        <style.terms>
-          {
-            formatMessage(getString('braveTalkOptInTerms'), {
-              tags: {
-                $1: (content) => (
-                  <NewTabLink key='terms' href={termsOfServiceURL}>
-                    {content}
-                  </NewTabLink>
-                ),
-                $3: (content) => (
-                  <NewTabLink key='privacy' href={privacyPolicyURL}>
-                    {content}
-                  </NewTabLink>
-                )
-              }
-            })
-          }
-        </style.terms>
       </style.root>
     )
   }
@@ -90,16 +74,34 @@ export function BraveTalkOptInForm (props: Props) {
     <style.root>
       <CashbackIcon />
       <style.header>
-        {getString('braveTalkTurnOnPrivateAdsToStartCall')}
+        {getString('braveTalkTurnOnRewardsToStartCall')}
       </style.header>
       <style.text>
-        {getString('braveTalkPrivateAdsDescription')}
+        {getString('braveTalkBraveRewardsDescription')}
       </style.text>
       <style.enable>
         <MainButton onClick={onRewardsTurnedOn}>
-          {getString('braveTalkTurnOnPrivateAds')}
+          {getString('braveTalkTurnOnRewards')}
         </MainButton>
       </style.enable>
+      <style.terms>
+        {
+          formatMessage(getString('braveTalkOptInTerms'), {
+            tags: {
+              $1: (content) => (
+                <NewTabLink key='terms' href={termsOfServiceURL}>
+                  {content}
+                </NewTabLink>
+              ),
+              $3: (content) => (
+                <NewTabLink key='privacy' href={privacyPolicyURL}>
+                  {content}
+                </NewTabLink>
+              )
+            }
+          })
+        }
+      </style.terms>
     </style.root>
   )
 }

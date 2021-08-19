@@ -50,15 +50,15 @@ export class AdsEnablePanel extends React.Component<Props, State> {
       chrome.braveRewards.enableRewards()
     }
 
-    const onRewardsTourClicked = () => {
+    const onTakeTour = () => {
       window.location.href = rewardsTourURL
     }
 
     return (
       <BraveTalkOptInForm
-        showRewardsOnboarding={this.props.rewardsPanelData.showOnboarding}
+        rewardsEnabled={!this.props.rewardsPanelData.showOnboarding}
         onEnable={onEnable}
-        onRewardsTourClicked={onRewardsTourClicked}
+        onTakeTour={onTakeTour}
       />
     )
   }

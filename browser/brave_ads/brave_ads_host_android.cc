@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "brave/browser/brave_ads/ads_service_factory.h"
 #include "brave/components/brave_ads/browser/ads_service.h"
 #include "chrome/browser/profiles/profile.h"
 #include "content/public/browser/web_contents.h"

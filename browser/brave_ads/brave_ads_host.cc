@@ -27,8 +27,7 @@ namespace brave_ads {
 
 namespace {
 
-constexpr char kAdsEnableRelativeUrl[] =
-    "request_ads_enabled_panel.html#enable_ads";
+constexpr char kAdsEnableRelativeUrl[] = "request_ads_enabled_panel.html";
 
 }  // namespace
 
@@ -67,6 +66,7 @@ void BraveAdsHost::RequestAdsEnabled(RequestAdsEnabledCallback callback) {
   }
   callback_ = std::move(callback);
 
+  rewards_service->StartProcess(base::DoNothing());
   rewards_service_observation_.Observe(rewards_service);
 
   if (!ShowRewardsPopup()) {
