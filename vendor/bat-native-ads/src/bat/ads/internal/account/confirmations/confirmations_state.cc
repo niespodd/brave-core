@@ -113,16 +113,6 @@ void ConfirmationsState::Save() {
       });
 }
 
-CatalogIssuersInfo ConfirmationsState::get_catalog_issuers() const {
-  return catalog_issuers_;
-}
-
-void ConfirmationsState::set_catalog_issuers(
-    const CatalogIssuersInfo& catalog_issuers) {
-  DCHECK(is_initialized_);
-  catalog_issuers_ = catalog_issuers;
-}
-
 ConfirmationList ConfirmationsState::get_failed_confirmations() const {
   DCHECK(is_initialized_);
   return failed_confirmations_;
@@ -190,10 +180,6 @@ privacy::UnblindedTokens* ConfirmationsState::get_unblinded_payment_tokens()
 std::string ConfirmationsState::ToJson() {
   base::Value dictionary(base::Value::Type::DICTIONARY);
 
-  // Catalog issuers
-  base::Value catalog_issuers_dictionary = catalog_issuers_.ToDictionary();
-  dictionary.SetKey("catalog_issuers", std::move(catalog_issuers_dictionary));
-
   // Next token redemption date
   dictionary.SetKey("next_token_redemption_date_in_seconds",
                     base::Value(std::to_string(static_cast<uint64_t>(
@@ -242,10 +228,6 @@ bool ConfirmationsState::FromJson(const std::string& json) {
     return false;
   }
 
-  if (!ParseCatalogIssuersFromDictionary(dictionary)) {
-    BLOG(1, "Failed to parse catalog issuers");
-  }
-
   if (!ParseNextTokenRedemptionDateFromDictionary(dictionary)) {
     BLOG(1, "Failed to parse next token redemption date");
   }
@@ -268,23 +250,6 @@ bool ConfirmationsState::FromJson(const std::string& json) {
 
   if (!ParseUnblindedPaymentTokensFromDictionary(dictionary)) {
     BLOG(1, "Failed to parse unblinded payment tokens");
-  }
-
-  return true;
-}
-
-bool ConfirmationsState::ParseCatalogIssuersFromDictionary(
-    base::DictionaryValue* dictionary) {
-  DCHECK(dictionary);
-
-  base::Value* catalog_issuers_dictionary =
-      dictionary->FindDictKey("catalog_issuers");
-  if (!catalog_issuers_dictionary) {
-    return false;
-  }
-
-  if (!catalog_issuers_.FromDictionary(catalog_issuers_dictionary)) {
-    return false;
   }
 
   return true;

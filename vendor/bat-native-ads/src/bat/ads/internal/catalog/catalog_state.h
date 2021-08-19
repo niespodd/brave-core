@@ -10,7 +10,6 @@
 #include <string>
 
 #include "bat/ads/internal/catalog/catalog_campaign_info.h"
-#include "bat/ads/internal/catalog/catalog_issuers_info.h"
 
 namespace ads {
 
@@ -25,7 +24,6 @@ struct CatalogState {
   int version = 0;
   int64_t ping = 0;
   CatalogCampaignList campaigns;
-  CatalogIssuersInfo catalog_issuers;
 };
 
 }  // namespace ads

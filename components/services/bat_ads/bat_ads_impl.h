@@ -124,16 +124,10 @@ class BatAdsImpl :
 
   void GetAdDiagnostics(GetAdDiagnosticsCallback callback) override;
 
-  void ToggleAdThumbUp(
-      const std::string& creative_instance_id,
-      const std::string& creative_set_id,
-      const int action,
-      ToggleAdThumbUpCallback callback) override;
-  void ToggleAdThumbDown(
-      const std::string& creative_instance_id,
-      const std::string& creative_set_id,
-      const int action,
-      ToggleAdThumbUpCallback callback) override;
+  void ToggleAdThumbUp(const std::string& json,
+                       ToggleAdThumbUpCallback callback) override;
+  void ToggleAdThumbDown(const std::string& json,
+                         ToggleAdThumbUpCallback callback) override;
   void ToggleAdOptInAction(
       const std::string& category,
       const int action,

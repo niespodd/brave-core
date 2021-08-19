@@ -257,12 +257,12 @@ class AdsBox extends React.Component<Props, State> {
     })
   }
 
-  onThumbUpPress = (creativeInstanceId: string, creativeSetId: string, action: number) => {
-    this.props.actions.toggleAdThumbUp(creativeInstanceId, creativeSetId, action)
+  onThumbUpPress = (adContent: Rewards.AdContent) => {
+    this.props.actions.toggleAdThumbUp(adContent)
   }
 
-  onThumbDownPress = (creativeInstanceId: string, creativeSetId: string, action: number) => {
-    this.props.actions.toggleAdThumbDown(creativeInstanceId, creativeSetId, action)
+  onThumbDownPress = (adContent: Rewards.AdContent) => {
+    this.props.actions.toggleAdThumbDown(adContent)
   }
 
   onOptInAction = (category: string, action: number) => {
@@ -319,6 +319,7 @@ class AdsBox extends React.Component<Props, State> {
     }
 
     const adContent: Rewards.AdContent = {
+      adType: adHistory.adContent.adType,
       creativeInstanceId: adHistory.adContent.creativeInstanceId,
       creativeSetId: adHistory.adContent.creativeSetId,
       brand: adHistory.adContent.brand,
@@ -331,13 +332,9 @@ class AdsBox extends React.Component<Props, State> {
       savedAd: adHistory.adContent.savedAd,
       flaggedAd: adHistory.adContent.flaggedAd,
       onThumbUpPress: () =>
-        this.onThumbUpPress(adHistory.adContent.creativeInstanceId,
-                            adHistory.adContent.creativeSetId,
-                            adHistory.adContent.likeAction),
+        this.onThumbUpPress(adHistory.adContent),
       onThumbDownPress: () =>
-        this.onThumbDownPress(adHistory.adContent.creativeInstanceId,
-                              adHistory.adContent.creativeSetId,
-                              adHistory.adContent.likeAction),
+        this.onThumbDownPress(adHistory.adContent),
       onMenuSave: () =>
         this.onMenuSave(adHistory.adContent.creativeInstanceId,
                         adHistory.adContent.creativeSetId,

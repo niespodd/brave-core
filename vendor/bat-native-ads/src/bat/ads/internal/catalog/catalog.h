@@ -30,7 +30,6 @@ class Catalog {
   std::string GetId() const;
   int GetVersion() const;
   int64_t GetPing() const;
-  CatalogIssuersInfo GetIssuers() const;
   CatalogCampaignList GetCampaigns() const;
 
  private:

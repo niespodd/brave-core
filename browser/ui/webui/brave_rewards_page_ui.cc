@@ -16,6 +16,8 @@
 #include "base/scoped_observation.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/time/time.h"
+#include "bat/ads/ad_content_info.h"
+#include "bat/ads/ad_type.h"
 #include "bat/ledger/mojom_structs.h"
 #include "brave/browser/brave_ads/ads_service_factory.h"
 #include "brave/browser/brave_rewards/rewards_service_factory.h"
@@ -90,14 +92,12 @@ class RewardsDOMHandler : public WebUIMessageHandler,
   void GetAdsData(const base::ListValue* args);
   void GetAdsHistory(const base::ListValue* args);
   void OnGetAdsHistory(const base::ListValue& history);
+  ads::AdContentInfo ParseAdContent(const base::ListValue* args);
+  base::Value AdContentInfoToValue(const ads::AdContentInfo& ad_content);
   void ToggleAdThumbUp(const base::ListValue* args);
-  void OnToggleAdThumbUp(
-      const std::string& creative_instance_id,
-      const int action);
+  void OnToggleAdThumbUp(const std::string& json);
   void ToggleAdThumbDown(const base::ListValue* args);
-  void OnToggleAdThumbDown(
-      const std::string& creative_instance_id,
-      const int action);
+  void OnToggleAdThumbDown(const std::string& json);
   void ToggleAdOptInAction(const base::ListValue* args);
   void OnToggleAdOptInAction(
       const std::string& category,
@@ -1193,63 +1193,151 @@ void RewardsDOMHandler::OnGetAdsHistory(const base::ListValue& ads_history) {
   CallJavascriptFunction("brave_rewards.adsHistory", ads_history);
 }
 
+ads::AdContentInfo RewardsDOMHandler::ParseAdContent(
+    const base::ListValue* args) {
+  ads::AdContentInfo ad_content;
+  base::Value list_element = args->GetList()[0].Clone();
+  base::DictionaryValue* ad_content_dict = nullptr;
+  if (list_element.GetAsDictionary(&ad_content_dict)) {
+    base::Optional<int> ad_type = ad_content_dict->FindIntKey("AdType");
+    if (ad_type && ad_type.has_value()) {
+      ad_content.type =
+          ads::AdType(static_cast<ads::AdType::Value>(ad_type.value()));
+    } else {
+      ad_content.type = ads::AdType::kUndefined;
+    }
+
+    std::string* uuid = ad_content_dict->FindStringKey("uuid");
+    if (uuid) {
+      ad_content.uuid = *uuid;
+    }
+
+    std::string* creative_instance_id =
+        ad_content_dict->FindStringKey("creativeInstanceId");
+    if (creative_instance_id) {
+      ad_content.creative_instance_id = *creative_instance_id;
+    }
+
+    std::string* creative_set_id =
+        ad_content_dict->FindStringKey("creativeSetId");
+    if (creative_set_id) {
+      ad_content.creative_set_id = *creative_set_id;
+    }
+
+    std::string* brand = ad_content_dict->FindStringKey("brand");
+    if (brand) {
+      ad_content.brand = *brand;
+    }
+
+    std::string* brand_info = ad_content_dict->FindStringKey("brandInfo");
+    if (brand_info) {
+      ad_content.brand_info = *brand_info;
+    }
+
+    std::string* brand_logo = ad_content_dict->FindStringKey("brandLogo");
+    if (brand_logo) {
+      ad_content.brand_logo = *brand_logo;
+    }
+
+    std::string* brand_display_url =
+        ad_content_dict->FindStringKey("brandDisplayUrl");
+    if (brand_display_url) {
+      ad_content.brand_display_url = *brand_display_url;
+    }
+
+    std::string* brand_url = ad_content_dict->FindStringKey("brandUrl");
+    if (brand_url) {
+      ad_content.brand_url = *brand_url;
+    }
+
+    base::Optional<int> saved_ad = ad_content_dict->FindIntKey("savedAd");
+    if (saved_ad && saved_ad.has_value()) {
+      ad_content.saved_ad = static_cast<bool>(saved_ad.value());
+    }
+
+    base::Optional<int> flagged_ad = ad_content_dict->FindIntKey("flaggedAd");
+    if (flagged_ad && flagged_ad.has_value()) {
+      ad_content.flagged_ad = static_cast<bool>(flagged_ad.value());
+    }
+  }
+
+  return ad_content;
+}
+
+base::Value RewardsDOMHandler::AdContentInfoToValue(
+    const ads::AdContentInfo& ad_content) {
+  // base::DictionaryValue ad_content_dictionary;
+  base::Value result(base::Value::Type::DICTIONARY);
+
+  result.SetKey("adType", base::Value(ad_content.type.value()));
+  result.SetKey("creativeInstanceId",
+                base::Value(ad_content.creative_instance_id));
+  result.SetKey("creativeSetId", base::Value(ad_content.creative_set_id));
+  result.SetKey("brand", base::Value(ad_content.brand));
+  result.SetKey("brandInfo", base::Value(ad_content.brand_info));
+  result.SetKey("brandLogo", base::Value(ad_content.brand_logo));
+  result.SetKey("brandDisplayUrl", base::Value(ad_content.brand_display_url));
+  result.SetKey("brandUrl", base::Value(ad_content.brand_url));
+  result.SetKey("likeAction",
+                base::Value(static_cast<int>(ad_content.like_action)));
+  result.SetKey("adAction", base::Value(std::string(ad_content.ad_action)));
+  result.SetKey("savedAd", base::Value(ad_content.saved_ad));
+  result.SetKey("flaggedAd", base::Value(ad_content.flagged_ad));
+  return result;
+}
+
 void RewardsDOMHandler::ToggleAdThumbUp(const base::ListValue* args) {
-  CHECK_EQ(3U, args->GetSize());
+  CHECK_EQ(1U, args->GetSize());
   if (!ads_service_) {
     return;
   }
 
   AllowJavascript();
 
-  const std::string id = args->GetList()[0].GetString();
-  const std::string creative_set_id = args->GetList()[1].GetString();
-  const int action = args->GetList()[2].GetInt();
+  ads::AdContentInfo ad_content = ParseAdContent(args);
+
   ads_service_->ToggleAdThumbUp(
-      id, creative_set_id, action,
-      base::BindOnce(&RewardsDOMHandler::OnToggleAdThumbUp,
-                     weak_factory_.GetWeakPtr()));
+      ad_content.ToJson(), base::BindOnce(&RewardsDOMHandler::OnToggleAdThumbUp,
+                                          weak_factory_.GetWeakPtr()));
 }
 
-void RewardsDOMHandler::OnToggleAdThumbUp(
-    const std::string& creative_instance_id,
-    const int action) {
+void RewardsDOMHandler::OnToggleAdThumbUp(const std::string& json) {
   if (!IsJavascriptAllowed()) {
     return;
   }
 
-  base::Value result(base::Value::Type::DICTIONARY);
-  result.SetKey("creativeInstanceId", base::Value(creative_instance_id));
-  result.SetKey("action", base::Value(action));
+  ads::AdContentInfo ad_content;
+  ad_content.FromJson(json);
+  base::Value result = AdContentInfoToValue(ad_content);
+
   CallJavascriptFunction("brave_rewards.onToggleAdThumbUp", result);
 }
 
 void RewardsDOMHandler::ToggleAdThumbDown(const base::ListValue* args) {
-  CHECK_EQ(3U, args->GetSize());
+  CHECK_EQ(1U, args->GetSize());
   if (!ads_service_) {
     return;
   }
 
   AllowJavascript();
 
-  const std::string id = args->GetList()[0].GetString();
-  const std::string creative_set_id = args->GetList()[1].GetString();
-  const int action = args->GetList()[2].GetInt();
+  const ads::AdContentInfo ad_content = ParseAdContent(args);
+
   ads_service_->ToggleAdThumbDown(
-      id, creative_set_id, action,
+      ad_content.ToJson(),
       base::BindOnce(&RewardsDOMHandler::OnToggleAdThumbDown,
                      weak_factory_.GetWeakPtr()));
 }
 
-void RewardsDOMHandler::OnToggleAdThumbDown(
-    const std::string& creative_instance_id,
-    const int action) {
+void RewardsDOMHandler::OnToggleAdThumbDown(const std::string& json) {
   if (!IsJavascriptAllowed()) {
     return;
   }
 
-  base::Value result(base::Value::Type::DICTIONARY);
-  result.SetKey("creativeInstanceId", base::Value(creative_instance_id));
-  result.SetKey("action", base::Value(action));
+  ads::AdContentInfo ad_content;
+  ad_content.FromJson(json);
+  base::Value result = AdContentInfoToValue(ad_content);
+
   CallJavascriptFunction("brave_rewards.onToggleAdThumbDown", result);
 }
 

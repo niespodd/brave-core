@@ -33,7 +33,7 @@ RedeemUnblindedPaymentTokensUrlRequestBuilder::
 RedeemUnblindedPaymentTokensUrlRequestBuilder::
     ~RedeemUnblindedPaymentTokensUrlRequestBuilder() = default;
 
-// PUT /v1/confirmation/payment/{payment_id}
+// PUT /v2/confirmation/payment/{payment_id}
 
 mojom::UrlRequestPtr RedeemUnblindedPaymentTokensUrlRequestBuilder::Build() {
   mojom::UrlRequestPtr url_request = mojom::UrlRequest::New();
@@ -50,7 +50,7 @@ mojom::UrlRequestPtr RedeemUnblindedPaymentTokensUrlRequestBuilder::Build() {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string RedeemUnblindedPaymentTokensUrlRequestBuilder::BuildUrl() const {
-  return base::StringPrintf("%s/v1/confirmation/payment/%s",
+  return base::StringPrintf("%s/v2/confirmation/payment/%s",
                             confirmations::server::GetHost().c_str(),
                             wallet_.id.c_str());
 }
@@ -108,6 +108,13 @@ RedeemUnblindedPaymentTokensUrlRequestBuilder::CreatePaymentRequestDTO(
 
     base::Value credential = CreateCredential(unblinded_token, payload);
     payment_credential.SetKey("credential", base::Value(std::move(credential)));
+
+    payment_credential.SetKey(
+        "creative_type", base::Value(std::string(unblinded_token.ad_type)));
+
+    payment_credential.SetKey(
+        "confirmation_type",
+        base::Value(std::string(unblinded_token.confirmation_type)));
 
     payment_credential.SetKey(
         "publicKey", base::Value(unblinded_token.public_key.encode_base64()));

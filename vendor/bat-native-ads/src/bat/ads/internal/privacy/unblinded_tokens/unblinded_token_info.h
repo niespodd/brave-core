@@ -8,6 +8,8 @@
 
 #include <vector>
 
+#include "bat/ads/ad_type.h"
+#include "bat/ads/confirmation_type.h"
 #include "wrapper.hpp"
 
 namespace ads {
@@ -26,6 +28,8 @@ struct UnblindedTokenInfo {
 
   UnblindedToken value;
   PublicKey public_key;
+  ConfirmationType confirmation_type;
+  AdType ad_type;
 };
 
 using UnblindedTokenList = std::vector<UnblindedTokenInfo>;

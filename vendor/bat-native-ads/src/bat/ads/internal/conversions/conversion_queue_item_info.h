@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "base/time/time.h"
+#include "bat/ads/ad_type.h"
+#include "bat/ads/confirmation_type.h"
 
 namespace ads {
 
@@ -27,6 +29,8 @@ struct ConversionQueueItemInfo {
   std::string advertiser_id;
   std::string conversion_id;
   std::string advertiser_public_key;
+  AdType ad_type = AdType::kUndefined;
+  ConfirmationType confirmation_type = ConfirmationType::kUndefined;
   base::Time timestamp;
 
   bool IsValid() const;

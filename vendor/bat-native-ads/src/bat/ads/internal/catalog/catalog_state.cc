@@ -38,7 +38,6 @@ bool CatalogState::FromJson(const std::string& json,
   int new_version = 0;
   int64_t new_ping = kDefaultCatalogPing * base::Time::kMillisecondsPerSecond;
   CatalogCampaignList new_campaigns;
-  CatalogIssuersInfo new_catalog_issuers;
 
   new_catalog_id = document["catalogId"].GetString();
 
@@ -297,29 +296,10 @@ bool CatalogState::FromJson(const std::string& json,
     new_campaigns.push_back(campaign_info);
   }
 
-  // Issuers
-  for (const auto& issuer : document["issuers"].GetArray()) {
-    CatalogIssuerInfo catalog_issuer_info;
-
-    std::string name = issuer["name"].GetString();
-    std::string public_key = issuer["publicKey"].GetString();
-
-    if (name == "confirmation") {
-      new_catalog_issuers.public_key = public_key;
-      continue;
-    }
-
-    catalog_issuer_info.name = name;
-    catalog_issuer_info.public_key = public_key;
-
-    new_catalog_issuers.issuers.push_back(catalog_issuer_info);
-  }
-
   catalog_id = new_catalog_id;
   version = new_version;
   ping = new_ping;
   campaigns = new_campaigns;
-  catalog_issuers = new_catalog_issuers;
 
   return true;
 }

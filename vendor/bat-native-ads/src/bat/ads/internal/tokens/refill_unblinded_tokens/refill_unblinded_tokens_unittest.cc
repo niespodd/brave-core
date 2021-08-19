@@ -52,19 +52,6 @@ class BatAdsRefillUnblindedTokensTest : public UnitTestBase {
     return wallet.Get();
   }
 
-  CatalogIssuersInfo GetValidCatalogIssuers() {
-    CatalogIssuersInfo catalog_issuers;
-    catalog_issuers.public_key = "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw=";
-
-    CatalogIssuerInfo catalog_issuer;
-    catalog_issuer.name = "1.23BAT";
-    catalog_issuer.public_key = "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=";
-
-    catalog_issuers.issuers = {catalog_issuer};
-
-    return catalog_issuers;
-  }
-
   std::vector<Token> GetTokens() {
     const std::vector<std::string>
         tokens_base64 =
@@ -148,7 +135,35 @@ class BatAdsRefillUnblindedTokensTest : public UnitTestBase {
                 ],
                 "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
               }
-            )"}}}};
+            )"}}},
+        {// Get issuers request
+         R"(/v1/issuers/)",
+         {{net::HTTP_OK, R"(
+          [
+            {
+              "name": "confirmations",
+              "publicKeys": [
+                "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+              ]
+            },
+            {
+              "name": "payments",
+              "publicKeys": [
+                "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+                "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+                "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+                "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+                "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+                "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+                "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+                "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+                "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+                "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+                "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+              ]
+            }
+          ]
+          )"}}}};
   }
 
   std::unique_ptr<privacy::TokenGeneratorMock> token_generator_mock_;
@@ -164,9 +179,6 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RefillUnblindedTokens) {
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -192,21 +204,109 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RefillUnblindedTokens) {
   EXPECT_EQ(50, get_unblinded_tokens()->Count());
 }
 
-TEST_F(BatAdsRefillUnblindedTokensTest, CatalogIssuersPublicKeyMismatch) {
+TEST_F(BatAdsRefillUnblindedTokensTest, IssuersPublicKeyMismatch) {
   // Arrange
-  const URLEndpoints endpoints = GetValidUrlRequestEndPoints();
+  const URLEndpoints endpoints = {
+      {// Request signed tokens
+       R"(/v1/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
+       {{net::HTTP_CREATED, R"(
+              {
+                "nonce": "2f0e2891-e7a5-4262-835b-550b13e58e5c"
+              }
+            )"}}},
+      {// Get signed tokens
+       R"(/v1/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7?nonce=2f0e2891-e7a5-4262-835b-550b13e58e5c)",
+       {{net::HTTP_OK, R"(
+              {
+                "batchProof": "BnqmsPk3PsQXVhcCE8YALSE8O+LVqOWabzCuyCTSgQjwAb3iAKrqDV3/zWKdU5TRoqzr32pyPyaS3xFI2iVmAw==",
+                "signedTokens": [
+                  "fD5YfqudgGrfn+oHpwPsF7COcPrCTLsYX70wa+EE+gg=",
+                  "OOPCQu4K+hfE7YaYnI4SyNI1KTIfNR71rIuZKs/9rE8=",
+                  "4kCHwIqcMuptlWqHNqGVpSBB5og8h5ooIQkno+qV0j4=",
+                  "/lNHOB5ISVVNvoTkS0n4PhDynjYJxKYwXnaDVfzmGSI=",
+                  "+ADYC6BAjtbrULLhXoBJM6mK7RPAyYUBA37Dfz223A8=",
+                  "ipBrQYPynDtfMVH4COUqZTUm/7Cs5j+4f2v+w1s0H20=",
+                  "Jrmctnj+ixdK3xUq+0eLklQsyofptcf9paHQrVD20QE=",
+                  "MMxS2Hdx3y6l2jWcBf1fMKxwAWN215S4CD/BPJ57oTA=",
+                  "oPI2nQ8Xu5cS8dmLfDynFjWaxxGgLzYX++qUdgLWxxU=",
+                  "mk+RCIjgRyqsFDG6Sukg7Sqq9ke7DheF8ID3QJqdCi8=",
+                  "OlKDho69Ulh+s/6KF8eS9LG3I58Aq3mgfPErr8AEo1s=",
+                  "pnZk5XlLuED7I/sYNYOedBqLvg9KAC1Tw4poxfojFBg=",
+                  "2mL4YIz3VFtdrHBpBUQLIPlsXkvfpqneMCneVDqDgBI=",
+                  "QPG8e94mNMUgeueC2h+ANRfnkjkG5yli/hpPw8mFwRk=",
+                  "2OiY14D3B9nKW1ai/ACOx/VO+y/xWFcrXwGPvlGQGwY=",
+                  "hNe+AZ+QIkbkwfnkYKmuq4LFjJez9c8QXCONIHMa2yI=",
+                  "lhXQa087T1T8yt32rwlO0Y9K9i6A6ysJxaeoCpQsUXk=",
+                  "2BVub545mBdHJIZnotoHP2QIrSstOdAGeHkTk8PbsA4=",
+                  "cvsy/fUIwOYgbTvxWoAH+RjRjdBKvjpC0yS8V7TTAzo=",
+                  "UsWm27QlfxDFAXUKOyQd+QbzFniAo8KMAcb8ogQn3zk=",
+                  "LO9hDP7KfQFIFuw4y6qKolzZCQAjVUtGa6SEJ0WtH28=",
+                  "oLrrrpgKoz/L8cEG4J2VV9VSJF8QG4Gactshr1WwZXQ=",
+                  "DrtwKP5kQEey3uOZvQzjqCTT30elIrLRvw3PIBqSdg4=",
+                  "mBxJCg3ClDS2IiJePXsv6KK6eQCY1yXvOi8m0/54uRg=",
+                  "9p4vrVEEIEnmreI1gy2JHvVtunHJjqT+oxUmwidJDlQ=",
+                  "VBMfinFy5m7jXqv1LPVqSvAn4mhntpFZ/PyS4eoJmiQ=",
+                  "om0eBmPqhiswq66mRdfgyzyPG/n/1jJXS5vLRMB1zTA=",
+                  "vs1t2qaE0RptGUHoc6CC1yNJAHJhs7g5Plwpk2hhwgQ=",
+                  "GLtViGiHvY6DnWT3OQ65JTBoCu4uv+S0MCvm97VJWkA=",
+                  "0tKtV02T7yomO6tb3D5rYr/UHQy6rITYVygqUMF+1Hk=",
+                  "SG4OS7WthG8Toff8NHIfBafHTB/8stW+bGrnt9ZUCWQ=",
+                  "/JaxZ/fXY8/bZdhL33sorUof6qDfhRHqJn7FGXNg5Wg=",
+                  "8vZlB2XPZF4vMn4K6FSNjvk5aZ4G6iCVSoU+Rh6Kgx0=",
+                  "xIbWr9fuB2qr1Xr6r5vMIzeOraIiLB338MSWl8RjATE=",
+                  "xDYuZfPQiVA5sW75Z4M+1fmtYvifXTEYX/BWsA701ks=",
+                  "2l6UgMUlJBEY2R+CTJBX5M2l552bkEPECu7YMP2OAy0=",
+                  "uLrkxPY2eBn3FJ4fkuklZimz455rCzCzvcFYBmVWFUQ=",
+                  "4EbkdgBc1IvhlGfaXuQxthQl3+wtM/qMdmnyfJE/MVc=",
+                  "RAlXUOypctgZ+EIBiqOVmnSW5VroQfT1aGqk0o/wR0s=",
+                  "tEehxSWHMtdBzl5mZWNSx9CmGzu1vrWm+YwdjvnNcUw=",
+                  "NF8qNh56/nXBPITAakis/FBUbNYlJQZ9ngR34VjJkiE=",
+                  "qrPGZKEmgnLMON6akKR2GR3omiPNBLnvB0f5Mh8EMVY=",
+                  "2A0rAiadKERas5Nb4d7UpBEMd15H8CF6R4a+E7QnPCk=",
+                  "MnS9QD/JJfsMWqZgXceAFDo/E60YQyd52Km+3jPCzhg=",
+                  "0rTQsecKlhLU9v6SBZuJbrUU+Yd5hx97EanqrZw6UV8=",
+                  "qIwAZMezVrm7ufJoTqSF+DEwOBXVdwf4zm0GMQZiZzI=",
+                  "6pYOa+9Kht35CGvrGEsbFqu3mxgzVTZzFJWytq0MpjU=",
+                  "xGd6OV9+IPhKkXgmn7AP6TcTZSANmweCS+PlgZLjQRA=",
+                  "tlX/IqPpfSvJfwCZzIZonVx3hln15RZpsifkiMxr53s=",
+                  "mML4eqBLA9XjZTqhoxVA6lVbMcjL54GqluGGPmMhWQA="
+                ],
+                "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+              }
+            )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+          [
+            {
+              "name": "confirmations",
+              "publicKeys": [
+                "erDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+              ]
+            },
+            {
+              "name": "payments",
+              "publicKeys": [
+                "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+                "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+                "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+                "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+                "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+                "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+                "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+                "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+                "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+                "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+                "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+              ]
+            }
+          ]
+          )"}}}};
+
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers;
-  catalog_issuers.public_key = "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=";
-  CatalogIssuerInfo catalog_issuer;
-  catalog_issuer.name = "1.23BAT";
-  catalog_issuer.public_key = "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=";
-  catalog_issuers.issuers = {catalog_issuer};
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -232,8 +332,17 @@ TEST_F(BatAdsRefillUnblindedTokensTest, CatalogIssuersPublicKeyMismatch) {
   EXPECT_EQ(0, get_unblinded_tokens()->Count());
 }
 
-TEST_F(BatAdsRefillUnblindedTokensTest, InvalidCatalogIssuers) {
+TEST_F(BatAdsRefillUnblindedTokensTest, InvalidIssuersFormat) {
   // Arrange
+  const URLEndpoints endpoints = {{// Get issuers request
+                                   R"(/v1/issuers/)",
+                                   {{net::HTTP_OK, R"(
+          {
+            "unknown": "format"
+          }
+          )"}}}};
+
+  MockUrlRequest(ads_client_mock_, endpoints);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -356,15 +465,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest,
               ],
               "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
             }
+          )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+          [
+            {
+              "name": "confirmations",
+              "publicKeys": [
+                "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+              ]
+            },
+            {
+              "name": "payments",
+              "publicKeys": [
+                "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+                "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+                "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+                "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+                "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+                "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+                "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+                "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+                "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+                "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+                "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+              ]
+            }
+          ]
           )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   InSequence seq;
@@ -398,15 +532,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RequestSignedTokensMissingNonce) {
   // Arrange
   const URLEndpoints endpoints = {
       {R"(/v1/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7)",
-       {{net::HTTP_CREATED, ""}}}};
+       {{net::HTTP_CREATED, ""}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+          [
+            {
+              "name": "confirmations",
+              "publicKeys": [
+                "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+              ]
+            },
+            {
+              "name": "payments",
+              "publicKeys": [
+                "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+                "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+                "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+                "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+                "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+                "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+                "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+                "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+                "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+                "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+                "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+              ]
+            }
+          ]
+          )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -507,15 +666,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest,
               ],
               "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
             }
-          )"}}}};
+          )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+        [
+          {
+            "name": "confirmations",
+            "publicKeys": [
+              "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+            ]
+          },
+          {
+            "name": "payments",
+            "publicKeys": [
+              "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+              "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+              "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+              "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+              "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+              "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+              "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+              "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+              "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+              "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+              "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+            ]
+          }
+        ]
+        )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   InSequence seq;
@@ -557,15 +741,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensInvalidResponse) {
           )"}}},
       {// Get signed tokens
        R"(/v1/confirmation/token/27a39b2f-9b2e-4eb0-bbb2-2f84447496e7?nonce=2f0e2891-e7a5-4262-835b-550b13e58e5c)",
-       {{net::HTTP_OK, "invalid_json"}}}};
+       {{net::HTTP_OK, "invalid_json"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+          [
+            {
+              "name": "confirmations",
+              "publicKeys": [
+                "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+              ]
+            },
+            {
+              "name": "payments",
+              "publicKeys": [
+                "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+                "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+                "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+                "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+                "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+                "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+                "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+                "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+                "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+                "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+                "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+              ]
+            }
+          ]
+          )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -659,15 +868,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingPublicKey) {
                 "mML4eqBLA9XjZTqhoxVA6lVbMcjL54GqluGGPmMhWQA="
               ]
             }
-          )"}}}};
+          )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+        [
+          {
+            "name": "confirmations",
+            "publicKeys": [
+              "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+            ]
+          },
+          {
+            "name": "payments",
+            "publicKeys": [
+              "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+              "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+              "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+              "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+              "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+              "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+              "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+              "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+              "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+              "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+              "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+            ]
+          }
+        ]
+        )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -761,15 +995,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingBatchProofDleq) {
               ],
               "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
             }
-          )"}}}};
+          )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+        [
+          {
+            "name": "confirmations",
+            "publicKeys": [
+              "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+            ]
+          },
+          {
+            "name": "payments",
+            "publicKeys": [
+              "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+              "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+              "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+              "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+              "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+              "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+              "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+              "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+              "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+              "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+              "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+            ]
+          }
+        ]
+        )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -812,15 +1071,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetSignedTokensMissingSignedTokens) {
               "batchProof": "BnqmsPk3PsQXVhcCE8YALSE8O+LVqOWabzCuyCTSgQjwAb3iAKrqDV3/zWKdU5TRoqzr32pyPyaS3xFI2iVmAw==",
               "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
             }
-          )"}}}};
+          )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+        [
+          {
+            "name": "confirmations",
+            "publicKeys": [
+              "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+            ]
+          },
+          {
+            "name": "payments",
+            "publicKeys": [
+              "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+              "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+              "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+              "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+              "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+              "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+              "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+              "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+              "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+              "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+              "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+            ]
+          }
+        ]
+        )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -915,15 +1199,40 @@ TEST_F(BatAdsRefillUnblindedTokensTest, GetInvalidSignedTokens) {
               ],
               "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
             }
-          )"}}}};
+          )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+        [
+          {
+            "name": "confirmations",
+            "publicKeys": [
+              "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+            ]
+          },
+          {
+            "name": "payments",
+            "publicKeys": [
+              "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+              "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+              "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+              "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+              "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+              "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+              "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+              "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+              "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+              "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+              "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+            ]
+          }
+        ]
+        )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
   const std::vector<Token> tokens = GetTokens();
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -960,9 +1269,6 @@ TEST_F(BatAdsRefillUnblindedTokensTest, VerifyAndUnblindInvalidTokens) {
   tokens[5] = invalid_token;
 
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,
@@ -1072,7 +1378,35 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RefillIfBelowTheMinimumThreshold) {
               ],
               "publicKey": "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
             }
-          )"}}}};
+          )"}}},
+      {// Get issuers request
+       R"(/v1/issuers/)",
+       {{net::HTTP_OK, R"(
+        [
+          {
+            "name": "confirmations",
+            "publicKeys": [
+              "crDVI1R6xHQZ4D9cQu4muVM5MaaM1QcOT4It8Y/CYlw="
+            ]
+          },
+          {
+            "name": "payments",
+            "publicKeys": [
+              "JiwFR2EU/Adf1lgox+xqOVPuc6a/rxdy/LguFG5eaXg=",
+              "XgxwreIbLMu0IIFVk4TKEce6RduNVXngDmU3uixly0M=",
+              "CrQLMWmUuYog6Q93nScS8Lo1HHSex8WM2Qxij7qhjkQ=",
+              "FnEJA85KqpxGaOkHiIzldRIUfaBe5etyUn2ThCpZKS0=",
+              "lLO5tErGoTK0askrALab6pKGAnBHqELSyw/evqZRwH8=",
+              "6DBiZUS47m8eb5ohI2MiRaERLzS4DQgMp4nxPLKAenA=",
+              "YOIEGq4joK7rtkWdcNdNNGT5xlU/KIrri4AX19qwZW4=",
+              "VihGXGoiQ5Fjxe4SrskIVMcmERa1LoAgvhFxxfLmNEI=",
+              "iJcG3AkH1sgl+5YCZuo+4Q/7aeBOnYyntkIUXeMbDCs=",
+              "aDD4SJmIj2xwdA6D00K1dopTg90oOFpwd2iiK8bqqlQ=",
+              "bPE1QE65mkIgytffeu7STOfly+x10BXCGuk5pVlOHQU="
+            ]
+          }
+        ]
+        )"}}}};
 
   MockUrlRequest(ads_client_mock_, endpoints);
 
@@ -1116,9 +1450,6 @@ TEST_F(BatAdsRefillUnblindedTokensTest, RefillIfBelowTheMinimumThreshold) {
   }
 
   ON_CALL(*token_generator_mock_, Generate(_)).WillByDefault(Return(tokens));
-
-  CatalogIssuersInfo catalog_issuers = GetValidCatalogIssuers();
-  ConfirmationsState::Get()->set_catalog_issuers(catalog_issuers);
 
   // Act
   EXPECT_CALL(*refill_unblinded_tokens_delegate_mock_,

@@ -315,6 +315,7 @@ declare namespace Rewards {
   }
 
   export interface AdContent {
+    adType: '' | 'ad_notification' | 'new_tab_page_ad' | 'promoted_content_ad' | 'inline_content_ad'
     creativeInstanceId: string
     creativeSetId: string
     brand: string

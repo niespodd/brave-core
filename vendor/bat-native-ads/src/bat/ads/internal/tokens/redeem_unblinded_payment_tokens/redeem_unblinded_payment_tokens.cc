@@ -20,6 +20,8 @@
 #include "brave_base/random.h"
 #include "net/http/http_status_code.h"
 
+#include <iostream>
+
 namespace ads {
 
 namespace {
@@ -85,7 +87,7 @@ void RedeemUnblindedPaymentTokens::Redeem() {
     return;
   }
 
-  BLOG(2, "PUT /v1/confirmation/payment/{payment_id}");
+  BLOG(2, "PUT /v2/confirmation/payment/{payment_id}");
 
   is_processing_ = true;
 
@@ -97,6 +99,9 @@ void RedeemUnblindedPaymentTokens::Redeem() {
   mojom::UrlRequestPtr url_request = url_request_builder.Build();
   BLOG(5, UrlRequestToString(url_request));
   BLOG(7, UrlRequestHeadersToString(url_request));
+
+  std::cerr << "[!] DEBUG Redeem: " << UrlRequestToString(url_request)
+            << std::endl;
 
   auto callback = std::bind(&RedeemUnblindedPaymentTokens::OnRedeem, this,
                             std::placeholders::_1, unblinded_tokens);
@@ -110,6 +115,9 @@ void RedeemUnblindedPaymentTokens::OnRedeem(
 
   BLOG(6, UrlResponseToString(url_response));
   BLOG(7, UrlResponseHeadersToString(url_response));
+
+  std::cerr << "[!] DEBUG OnRedeem: " << UrlResponseToString(url_response)
+            << std::endl;
 
   if (url_response.status_code != net::HTTP_OK) {
     BLOG(1, "Failed to redeem unblinded payment tokens");

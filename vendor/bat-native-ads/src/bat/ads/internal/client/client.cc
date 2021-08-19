@@ -154,20 +154,18 @@ const PurchaseIntentSignalHistoryMap& Client::GetPurchaseIntentSignalHistory()
 }
 
 AdContentInfo::LikeAction Client::ToggleAdThumbUp(
-    const std::string& creative_instance_id,
-    const std::string& creative_set_id,
-    const AdContentInfo::LikeAction action) {
+    const AdContentInfo& ad_content) {
   DCHECK(is_initialized_);
 
   AdContentInfo::LikeAction like_action;
-  if (action == AdContentInfo::LikeAction::kThumbsUp) {
+  if (ad_content.like_action == AdContentInfo::LikeAction::kThumbsUp) {
     like_action = AdContentInfo::LikeAction::kNeutral;
   } else {
     like_action = AdContentInfo::LikeAction::kThumbsUp;
   }
 
   // Remove this ad from the filtered ads list
-  auto it_ad = FindFilteredAd(creative_instance_id,
+  auto it_ad = FindFilteredAd(ad_content.creative_instance_id,
                               &client_->ad_preferences.filtered_ads);
   if (it_ad != client_->ad_preferences.filtered_ads.end()) {
     client_->ad_preferences.filtered_ads.erase(it_ad);
@@ -175,7 +173,8 @@ AdContentInfo::LikeAction Client::ToggleAdThumbUp(
 
   // Update the history detail for ads matching this UUID
   for (auto& item : client_->ads_shown_history) {
-    if (item.ad_content.creative_instance_id == creative_instance_id) {
+    if (item.ad_content.creative_instance_id ==
+        ad_content.creative_instance_id) {
       item.ad_content.like_action = like_action;
     }
   }
@@ -186,20 +185,18 @@ AdContentInfo::LikeAction Client::ToggleAdThumbUp(
 }
 
 AdContentInfo::LikeAction Client::ToggleAdThumbDown(
-    const std::string& creative_instance_id,
-    const std::string& creative_set_id,
-    const AdContentInfo::LikeAction action) {
+    const AdContentInfo& ad_content) {
   DCHECK(is_initialized_);
 
   AdContentInfo::LikeAction like_action;
-  if (action == AdContentInfo::LikeAction::kThumbsDown) {
+  if (ad_content.like_action == AdContentInfo::LikeAction::kThumbsDown) {
     like_action = AdContentInfo::LikeAction::kNeutral;
   } else {
     like_action = AdContentInfo::LikeAction::kThumbsDown;
   }
 
   // Update this ad in the filtered ads list
-  auto it_ad = FindFilteredAd(creative_instance_id,
+  auto it_ad = FindFilteredAd(ad_content.creative_instance_id,
                               &client_->ad_preferences.filtered_ads);
   if (like_action == AdContentInfo::LikeAction::kNeutral) {
     if (it_ad != client_->ad_preferences.filtered_ads.end()) {
@@ -208,15 +205,16 @@ AdContentInfo::LikeAction Client::ToggleAdThumbDown(
   } else {
     if (it_ad == client_->ad_preferences.filtered_ads.end()) {
       FilteredAdInfo filtered_ad;
-      filtered_ad.creative_instance_id = creative_instance_id;
-      filtered_ad.creative_set_id = creative_set_id;
+      filtered_ad.creative_instance_id = ad_content.creative_instance_id;
+      filtered_ad.creative_set_id = ad_content.creative_set_id;
       client_->ad_preferences.filtered_ads.push_back(filtered_ad);
     }
   }
 
   // Update the history detail for ads matching this UUID
   for (auto& item : client_->ads_shown_history) {
-    if (item.ad_content.creative_instance_id == creative_instance_id) {
+    if (item.ad_content.creative_instance_id ==
+        ad_content.creative_instance_id) {
       item.ad_content.like_action = like_action;
     }
   }

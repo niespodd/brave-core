@@ -192,14 +192,8 @@ class AdsImpl : public Ads,
 
   void GetAdDiagnostics(GetAdDiagnosticsCallback callback) override;
 
-  AdContentInfo::LikeAction ToggleAdThumbUp(
-      const std::string& creative_instance_id,
-      const std::string& creative_set_id,
-      const AdContentInfo::LikeAction& action) override;
-  AdContentInfo::LikeAction ToggleAdThumbDown(
-      const std::string& creative_instance_id,
-      const std::string& creative_set_id,
-      const AdContentInfo::LikeAction& action) override;
+  AdContentInfo::LikeAction ToggleAdThumbUp(const std::string& json) override;
+  AdContentInfo::LikeAction ToggleAdThumbDown(const std::string& json) override;
   CategoryContentInfo::OptAction ToggleAdOptInAction(
       const std::string& category,
       const CategoryContentInfo::OptAction& action) override;

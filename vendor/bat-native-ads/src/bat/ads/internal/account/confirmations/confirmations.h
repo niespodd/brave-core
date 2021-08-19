@@ -10,6 +10,7 @@
 #include <string>
 
 #include "base/values.h"
+#include "bat/ads/ad_type.h"
 #include "bat/ads/ads.h"
 #include "bat/ads/internal/account/confirmations/confirmations_observer.h"
 #include "bat/ads/internal/privacy/tokens/token_generator_interface.h"
@@ -21,7 +22,6 @@ namespace ads {
 class AdRewards;
 class ConfirmationsState;
 class RedeemUnblindedToken;
-struct CatalogIssuersInfo;
 struct UnblindedTokenInfo;
 
 class Confirmations : public RedeemUnblindedTokenDelegate {
@@ -34,9 +34,8 @@ class Confirmations : public RedeemUnblindedTokenDelegate {
   void AddObserver(ConfirmationsObserver* observer);
   void RemoveObserver(ConfirmationsObserver* observer);
 
-  void SetCatalogIssuers(const CatalogIssuersInfo& catalog_issuers);
-
   void ConfirmAd(const std::string& creative_instance_id,
+                 const AdType& ad_type,
                  const ConfirmationType& confirmation_type);
 
   void RetryAfterDelay();
@@ -52,6 +51,7 @@ class Confirmations : public RedeemUnblindedTokenDelegate {
   ConfirmationInfo CreateConfirmation(
       const std::string& creative_instance_id,
       const ConfirmationType& confirmation_type,
+      const AdType& ad_type,
       const base::DictionaryValue& user_data) const;
 
   Timer retry_timer_;

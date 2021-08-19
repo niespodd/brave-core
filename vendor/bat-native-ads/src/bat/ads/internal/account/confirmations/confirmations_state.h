@@ -13,7 +13,6 @@
 #include "base/values.h"
 #include "bat/ads/ads.h"
 #include "bat/ads/internal/account/confirmations/confirmation_info.h"
-#include "bat/ads/internal/catalog/catalog_issuers_info.h"
 #include "bat/ads/internal/privacy/unblinded_tokens/unblinded_tokens.h"
 #include "bat/ads/transaction_info.h"
 
@@ -35,9 +34,6 @@ class ConfirmationsState {
 
   void Load();
   void Save();
-
-  CatalogIssuersInfo get_catalog_issuers() const;
-  void set_catalog_issuers(const CatalogIssuersInfo& catalog_issuers);
 
   ConfirmationList get_failed_confirmations() const;
   void append_failed_confirmation(const ConfirmationInfo& confirmation);
@@ -64,9 +60,6 @@ class ConfirmationsState {
 
   std::string ToJson();
   bool FromJson(const std::string& json);
-
-  CatalogIssuersInfo catalog_issuers_;
-  bool ParseCatalogIssuersFromDictionary(base::DictionaryValue* dictionary);
 
   ConfirmationList failed_confirmations_;
   base::Value GetFailedConfirmationsAsDictionary(

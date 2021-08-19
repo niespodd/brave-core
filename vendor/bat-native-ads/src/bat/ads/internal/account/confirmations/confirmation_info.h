@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "bat/ads/ad_type.h"
 #include "bat/ads/confirmation_type.h"
 #include "bat/ads/internal/privacy/unblinded_tokens/unblinded_token_info.h"
 #include "wrapper.hpp"
@@ -32,6 +33,7 @@ struct ConfirmationInfo {
   std::string id;
   std::string creative_instance_id;
   ConfirmationType type = ConfirmationType::kUndefined;
+  AdType ad_type = AdType::kUndefined;
   privacy::UnblindedTokenInfo unblinded_token;
   Token payment_token;
   BlindedToken blinded_payment_token;

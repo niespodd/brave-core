@@ -20,6 +20,7 @@
 #include "url/gurl.h"
 
 namespace ads {
+struct AdContentInfo;
 struct AdsHistoryInfo;
 }
 
@@ -37,10 +38,9 @@ namespace brave_ads {
 using OnGetAdsHistoryCallback =
     base::OnceCallback<void(const base::ListValue&)>;
 
-using OnToggleAdThumbUpCallback =
-    base::OnceCallback<void(const std::string&, int)>;
+using OnToggleAdThumbUpCallback = base::OnceCallback<void(const std::string&)>;
 using OnToggleAdThumbDownCallback =
-    base::OnceCallback<void(const std::string&, int)>;
+    base::OnceCallback<void(const std::string&)>;
 using OnToggleAdOptInActionCallback =
     base::OnceCallback<void(const std::string&, int)>;
 using OnToggleAdOptOutActionCallback =
@@ -152,13 +152,9 @@ class AdsService : public KeyedService {
 
   virtual void GetAdDiagnostics(GetAdDiagnosticsCallback callback) = 0;
 
-  virtual void ToggleAdThumbUp(const std::string& creative_instance_id,
-                               const std::string& creative_set_id,
-                               const int action,
+  virtual void ToggleAdThumbUp(const std::string& json,
                                OnToggleAdThumbUpCallback callback) = 0;
-  virtual void ToggleAdThumbDown(const std::string& creative_instance_id,
-                                 const std::string& creative_set_id,
-                                 const int action,
+  virtual void ToggleAdThumbDown(const std::string& json,
                                  OnToggleAdThumbDownCallback callback) = 0;
   virtual void ToggleAdOptInAction(const std::string& category,
                                    const int action,

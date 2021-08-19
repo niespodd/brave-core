@@ -28,6 +28,9 @@ UnblindedTokenInfo CreateUnblindedToken(
       PublicKey::decode_base64("RJ2i/o/pZkrH+i0aGEMY1G9FXtd7Q7gfRi3YdNRnDDk=");
   DCHECK(!ExceptionOccurred());
 
+  unblinded_token.confirmation_type = ConfirmationType::kUndefined;
+  unblinded_token.ad_type = AdType::kUndefined;
+
   return unblinded_token;
 }
 

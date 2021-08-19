@@ -8,7 +8,6 @@
 #include "base/time/time.h"
 #include "bat/ads/ads.h"
 #include "bat/ads/internal/ads_client_helper.h"
-#include "bat/ads/internal/catalog/catalog_issuers_info.h"
 #include "bat/ads/internal/catalog/catalog_state.h"
 #include "bat/ads/internal/json_helper.h"
 #include "bat/ads/internal/logging.h"
@@ -48,10 +47,6 @@ int Catalog::GetVersion() const {
 
 int64_t Catalog::GetPing() const {
   return catalog_state_->ping / base::Time::kMillisecondsPerSecond;
-}
-
-CatalogIssuersInfo Catalog::GetIssuers() const {
-  return catalog_state_->catalog_issuers;
 }
 
 CatalogCampaignList Catalog::GetCampaigns() const {

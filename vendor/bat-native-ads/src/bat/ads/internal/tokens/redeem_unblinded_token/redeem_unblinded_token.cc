@@ -28,6 +28,8 @@
 #include "net/http/http_status_code.h"
 #include "wrapper.hpp"
 
+#include <iostream>
+
 namespace ads {
 
 using challenge_bypass_ristretto::BatchDLEQProof;
@@ -37,7 +39,8 @@ using challenge_bypass_ristretto::SignedToken;
 using challenge_bypass_ristretto::Token;
 using challenge_bypass_ristretto::UnblindedToken;
 
-RedeemUnblindedToken::RedeemUnblindedToken() = default;
+RedeemUnblindedToken::RedeemUnblindedToken()
+    : get_issuers_(std::make_unique<GetIssuers>()) {}
 
 RedeemUnblindedToken::~RedeemUnblindedToken() = default;
 
@@ -54,7 +57,7 @@ void RedeemUnblindedToken::Redeem(const ConfirmationInfo& confirmation) {
     return;
   }
 
-  FetchPaymentToken(confirmation);
+  RequestIssuers(confirmation);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,6 +71,9 @@ void RedeemUnblindedToken::CreateConfirmation(
   mojom::UrlRequestPtr url_request = url_request_builder.Build();
   BLOG(5, UrlRequestToString(url_request));
   BLOG(7, UrlRequestHeadersToString(url_request));
+
+  std::cerr << "[!] DEBUG CreateConfirmation: "
+            << UrlRequestToString(url_request) << std::endl;
 
   auto callback = std::bind(&RedeemUnblindedToken::OnCreateConfirmation, this,
                             std::placeholders::_1, confirmation);
@@ -83,6 +89,9 @@ void RedeemUnblindedToken::OnCreateConfirmation(
 
   BLOG(6, UrlResponseToString(url_response));
   BLOG(7, UrlResponseHeadersToString(url_response));
+
+  std::cerr << "[!] DEBUG OnCreateConfirmation: "
+            << UrlResponseToString(url_response) << std::endl;
 
   if (url_response.status_code == net::HTTP_BAD_REQUEST) {
     // OnFetchPaymentToken handles HTTP response status codes for duplicate/bad
@@ -102,7 +111,24 @@ void RedeemUnblindedToken::OnCreateConfirmation(
   ConfirmationInfo new_confirmation = confirmation;
   new_confirmation.created = true;
 
-  FetchPaymentToken(new_confirmation);
+  RequestIssuers(new_confirmation);
+}
+
+void RedeemUnblindedToken::RequestIssuers(
+    const ConfirmationInfo& confirmation) {
+  auto callback =
+      std::bind(&RedeemUnblindedToken::OnRequestIssuers, this, confirmation);
+  get_issuers_->RequestIssuers(callback);
+}
+
+void RedeemUnblindedToken::OnRequestIssuers(
+    const ConfirmationInfo& confirmation) {
+  if (!get_issuers_->IsInitialized()) {
+    OnFailedToRedeemUnblindedToken(confirmation, /* should_retry */ true);
+    return;
+  }
+
+  FetchPaymentToken(confirmation);
 }
 
 void RedeemUnblindedToken::FetchPaymentToken(
@@ -127,8 +153,16 @@ void RedeemUnblindedToken::OnFetchPaymentToken(
     const ConfirmationInfo& confirmation) {
   BLOG(1, "OnFetchPaymentToken");
 
+  if (!get_issuers_->IsInitialized()) {
+    OnFailedToRedeemUnblindedToken(confirmation, /* should_retry */ true);
+    return;
+  }
+
   BLOG(6, UrlResponseToString(url_response));
   BLOG(7, UrlResponseHeadersToString(url_response));
+
+  std::cerr << "[!] DEBUG OnFetchPaymentToken: "
+            << UrlResponseToString(url_response) << std::endl;
 
   if (url_response.status_code == net::HTTP_NOT_FOUND) {
     BLOG(1, "Confirmation not found");
@@ -214,6 +248,14 @@ void RedeemUnblindedToken::OnFetchPaymentToken(
     return;
   }
 
+  // TODO(tmancey): refactor
+  if (!get_issuers_->PublicKeyExists("payments", *public_key_base64)) {
+    BLOG(0, "Response public key " << *public_key_base64 << " does not match"
+                                   << " any payments public key");
+    OnFailedToRedeemUnblindedToken(confirmation, /* should_retry */ true);
+    return;
+  }
+
   // Get batch dleq proof
   const std::string* batch_dleq_proof_base64 =
       payment_token_dictionary->FindStringKey("batchProof");
@@ -281,6 +323,8 @@ void RedeemUnblindedToken::OnFetchPaymentToken(
   privacy::UnblindedTokenInfo unblinded_payment_token;
   unblinded_payment_token.value = batch_dleq_proof_unblinded_tokens.front();
   unblinded_payment_token.public_key = public_key;
+  unblinded_payment_token.confirmation_type = confirmation.type;
+  unblinded_payment_token.ad_type = confirmation.ad_type;
 
   OnDidRedeemUnblindedToken(confirmation, unblinded_payment_token);
 }

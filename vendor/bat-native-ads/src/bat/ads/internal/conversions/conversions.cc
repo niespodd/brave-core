@@ -383,6 +383,8 @@ void Conversions::AddItemToQueue(
   conversion_queue_item.conversion_id = verifiable_conversion.id;
   conversion_queue_item.advertiser_public_key =
       verifiable_conversion.public_key;
+  conversion_queue_item.ad_type = ad_event.type;
+  conversion_queue_item.confirmation_type = ad_event.confirmation_type;
   const int64_t rand_delay = brave_base::random::Geometric(
       g_is_debug ? kDebugConvertAfterSeconds : kConvertAfterSeconds);
   conversion_queue_item.timestamp =

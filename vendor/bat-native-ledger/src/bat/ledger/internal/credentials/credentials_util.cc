@@ -54,7 +54,6 @@ std::vector<BlindedToken> GenerateBlindCreds(const std::vector<Token>& creds) {
   for (unsigned int i = 0; i < creds.size(); i++) {
     auto cred = creds.at(i);
     auto blinded_cred = cred.blind();
-
     blinded_creds.push_back(blinded_cred);
   }
 
