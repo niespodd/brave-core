@@ -8,13 +8,14 @@ import * as style from './main_button.style'
 
 interface Props {
   onClick: () => void
+  testId?: string
   children: React.ReactNode
 }
 
 export function MainButton (props: Props) {
   return (
     <style.root>
-      <button onClick={props.onClick}>{props.children}</button>
+      <button onClick={props.onClick} data-test-id={props.testId}>{props.children}</button>
     </style.root>
   )
 }
