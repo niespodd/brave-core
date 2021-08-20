@@ -8,7 +8,7 @@ import modalBackground from './assets/opt_in_modal_bg.svg'
 
 export const root = styled.div`
   flex: 0 0 auto;
-  min-width: 365px;
+  min-width: 345px;
   padding: 17px;
   font-family: var(--brave-font-heading);
   text-align: center;
@@ -44,11 +44,11 @@ export const text = styled.div`
 `
 
 export const enable = styled.div`
-  margin-top: 25px;
-  margin-bottom: 15px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 
   button {
-    min-width: 330px;
+    min-width: 290px;
   }
 `
 
@@ -66,7 +66,7 @@ export const terms = styled.div`
 `
 
 export const learn = styled.div`
-  margin: 20px 14px 15px;
+  margin: 15px 6px 15px;
   color: var(--brave-palette-neutral700);
   font-size: 14px;
   line-height: 24px;

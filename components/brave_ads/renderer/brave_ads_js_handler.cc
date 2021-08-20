@@ -21,6 +21,13 @@
 
 namespace brave_ads {
 
+namespace {
+
+constexpr char kUserGestureRejectReason[] =
+    "braveRequestAdsEnabled: API can only be initiated by a user gesture.";
+
+}  // namespace
+
 BraveAdsJSHandler::BraveAdsJSHandler(content::RenderFrame* render_frame)
     : render_frame_(render_frame) {}
 
@@ -97,33 +104,33 @@ v8::Local<v8::Promise> BraveAdsJSHandler::RequestAdsEnabled(
     return v8::Local<v8::Promise>();
   }
 
-  auto* web_frame = render_frame_->GetWebFrame();
-  DCHECK(web_frame);
-  if (!web_frame->HasTransientUserActivation()) {
-    const blink::WebString message =
-        "requestAdsEnabled: "
-        "API can only be initiated by a user gesture.";
-    web_frame->AddMessageToConsole(blink::WebConsoleMessage(
-        blink::mojom::ConsoleMessageLevel::kWarning, message));
+  v8::MaybeLocal<v8::Promise::Resolver> maybe_resolver =
+      v8::Promise::Resolver::New(isolate->GetCurrentContext());
+  if (maybe_resolver.IsEmpty()) {
     return v8::Local<v8::Promise>();
   }
 
-  v8::MaybeLocal<v8::Promise::Resolver> resolver =
-      v8::Promise::Resolver::New(isolate->GetCurrentContext());
-  if (!resolver.IsEmpty()) {
-    auto promise_resolver =
-        std::make_unique<v8::Global<v8::Promise::Resolver>>();
-    promise_resolver->Reset(isolate, resolver.ToLocalChecked());
-    auto context_old = std::make_unique<v8::Global<v8::Context>>(
-        isolate, isolate->GetCurrentContext());
-    brave_ads_->RequestAdsEnabled(base::BindOnce(
-        &BraveAdsJSHandler::OnRequestAdsEnabled, base::Unretained(this),
-        std::move(promise_resolver), isolate, std::move(context_old)));
+  v8::Local<v8::Promise::Resolver> resolver = maybe_resolver.ToLocalChecked();
 
-    return resolver.ToLocalChecked()->GetPromise();
+  auto* web_frame = render_frame_->GetWebFrame();
+  DCHECK(web_frame);
+  if (!web_frame->HasTransientUserActivation()) {
+    v8::Local<v8::String> result =
+        v8::String::NewFromUtf8(isolate, kUserGestureRejectReason)
+            .ToLocalChecked();
+    ALLOW_UNUSED_LOCAL(resolver->Reject(isolate->GetCurrentContext(), result));
+    return resolver->GetPromise();
   }
 
-  return v8::Local<v8::Promise>();
+  auto promise_resolver = std::make_unique<v8::Global<v8::Promise::Resolver>>();
+  promise_resolver->Reset(isolate, resolver);
+  auto context_old = std::make_unique<v8::Global<v8::Context>>(
+      isolate, isolate->GetCurrentContext());
+  brave_ads_->RequestAdsEnabled(base::BindOnce(
+      &BraveAdsJSHandler::OnRequestAdsEnabled, base::Unretained(this),
+      std::move(promise_resolver), isolate, std::move(context_old)));
+
+  return resolver->GetPromise();
 }
 
 void BraveAdsJSHandler::OnRequestAdsEnabled(

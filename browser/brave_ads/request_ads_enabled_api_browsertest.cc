@@ -29,22 +29,26 @@
 
 namespace {
 
-const char kAllowedDomain[] = "talk.brave.com";
-const char kNotAllowedDomain[] = "brave.com";
-const char kBraveRequestAdsEnabledExists[] =
+constexpr char kAllowedDomain[] = "talk.brave.com";
+constexpr char kNotAllowedDomain[] = "brave.com";
+constexpr char kBraveRequestAdsEnabledExists[] =
     "window.domAutomationController.send("
     "  !!(window.chrome && window.chrome.braveRequestAdsEnabled)"
     ")";
-const char kBraveRequestAdsEnabled[] =
+constexpr char kBraveRequestAdsEnabled[] =
     "let request_promise = window.chrome.braveRequestAdsEnabled()";
-const char kResolveRequestAdsEnabledPromise[] =
+constexpr char kResolveRequestAdsEnabledPromise[] =
     "request_promise.then(function (enabled) {"
     "  window.domAutomationController.send(enabled)"
     "})";
-const char kCheckRequestAdsEnabledPromiseUndefined[] =
-    "window.domAutomationController.send("
-    "  typeof request_promise === 'undefined'"
-    ")";
+constexpr char kGetRequestAdsEnabledPromiseRejectReason[] =
+    "window.chrome.braveRequestAdsEnabled().then("
+    "    undefined,"
+    "    function (reason) {"
+    "        window.domAutomationController.send(reason)"
+    "    })";
+constexpr char kUserGestureRejectReason[] =
+    "braveRequestAdsEnabled: API can only be initiated by a user gesture.";
 
 }  // namespace
 
@@ -246,13 +250,10 @@ IN_PROC_BROWSER_TEST_F(RequestAdsEnabledApiTestEnabled,
       contents, kBraveRequestAdsEnabledExists, &has_api));
   EXPECT_TRUE(has_api);
 
-  EXPECT_TRUE(
-      ExecuteScriptWithoutUserGesture(contents, kBraveRequestAdsEnabled));
-
-  bool enabled;
-  EXPECT_TRUE(ExecuteScriptWithoutUserGestureAndExtractBool(
-      contents, kCheckRequestAdsEnabledPromiseUndefined, &enabled));
-  EXPECT_TRUE(enabled);
+  std::string status;
+  EXPECT_TRUE(ExecuteScriptWithoutUserGestureAndExtractString(
+      contents, kGetRequestAdsEnabledPromiseRejectReason, &status));
+  EXPECT_EQ(status, kUserGestureRejectReason);
 }
 
 IN_PROC_BROWSER_TEST_F(RequestAdsEnabledApiTestEnabled,
