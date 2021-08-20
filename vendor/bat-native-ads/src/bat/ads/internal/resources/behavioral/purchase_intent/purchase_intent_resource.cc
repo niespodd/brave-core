@@ -11,7 +11,6 @@
 #include "bat/ads/internal/ads_client_helper.h"
 #include "bat/ads/internal/features/purchase_intent/purchase_intent_features.h"
 #include "bat/ads/internal/logging.h"
-#include "brave/components/l10n/common/locale_util.h"
 
 namespace ads {
 namespace resource {
