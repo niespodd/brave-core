@@ -92,7 +92,6 @@ IN_PROC_BROWSER_TEST_F(BraveMainDelegateBrowserTest, DisabledFeatures) {
     &net::features::kFirstPartySets,
     &network::features::kTrustTokens,
     &network_time::kNetworkTimeServiceQuerying,
-    &password_manager::features::kEnablePasswordsAccountStorage,
   };
 
   for (const auto* feature : disabled_features)
