@@ -7,6 +7,7 @@
 
 #include "brave/components/brave_wallet/browser/eth_json_rpc_controller.h"
 #include "components/keyed_service/ios/browser_state_dependency_manager.h"
+#include "components/user_prefs/user_prefs.h"
 #include "ios/chrome/browser/browser_state/browser_state_otr_helper.h"
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "services/network/public/cpp/shared_url_loader_factory.h"
@@ -37,8 +38,8 @@ EthJsonRpcControllerFactory::BuildServiceInstanceFor(
     web::BrowserState* context) const {
   auto* browser_state = ChromeBrowserState::FromBrowserState(context);
   std::unique_ptr<EthJsonRpcController> eth_json_rpc_controller(
-      new EthJsonRpcController(mojom::Network::Mainnet,
-                               browser_state->GetSharedURLLoaderFactory()));
+      new EthJsonRpcController(browser_state->GetSharedURLLoaderFactory(),
+                               user_prefs::UserPrefs::Get(context)));
   return eth_json_rpc_controller;
 }
 
